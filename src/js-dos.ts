@@ -1,4 +1,5 @@
 import { Emulators, CommandInterface } from "emulators";
+import { TransportLayer } from "emulators/dist/types/protocol/protocol";
 import { EmulatorsUi } from "./emulators-ui";
 import { Layers, LayersOptions } from "./dom/layers";
 import { Button } from "./controls/button";
@@ -9,12 +10,13 @@ import { MouseMode, MouseProps } from "./controls/mouse";
 
 declare const emulators: Emulators;
 
-export type EmulatorFunction = "dosWorker" | "dosDirect" | "janus";
+export type EmulatorFunction = "dosboxWorker" | "dosboxDirect" | "dosboxNode" | "janus" | "backend";
 
 export interface DosOptions {
     emulatorFunction?: EmulatorFunction;
     clickToStart?: boolean;
     layersOptions?: LayersOptions;
+    createTransportLayer?: () => TransportLayer;
 }
 
 export class DosInstance {
@@ -22,6 +24,7 @@ export class DosInstance {
 
     emulatorsUi: EmulatorsUi;
     emulatorFunction: EmulatorFunction;
+    createTransportLayer?: () => TransportLayer;
     layers: Layers;
     ciPromise?: Promise<CommandInterface>;
 
@@ -37,10 +40,15 @@ export class DosInstance {
         }
 
         this.emulatorsUi = emulatorsUi;
-        this.emulatorFunction = options.emulatorFunction || "dosWorker";
+        this.emulatorFunction = options.emulatorFunction || "dosboxWorker";
         this.clickToStart = options.clickToStart || false;
         this.layers = this.emulatorsUi.dom.layers(root, options.layersOptions);
         this.layers.showLoadingLayer();
+        this.createTransportLayer = options.createTransportLayer;
+
+        if (this.emulatorFunction === "backend" && this.createTransportLayer === undefined) {
+            throw new Error("Emulator function set to 'backend' but 'createTransportLayer' is not a function");
+        }
     }
 
     async run(bundleUrl: string, optionalChangesUrl?: string): Promise<CommandInterface> {
@@ -49,7 +57,7 @@ export class DosInstance {
         const persistKey = bundleUrl + ".changes";
         if (this.emulatorFunction === "janus") {
             this.layers.setLoadingMessage("Connecting...");
-            this.ciPromise = emulators[this.emulatorFunction](bundleUrl);
+            this.ciPromise = emulators.janus(bundleUrl);
         } else {
             this.layers.setLoadingMessage("Downloading bundle ...");
             const bundlePromise = emulatorsUi.network.resolveBundle(bundleUrl, {
@@ -65,10 +73,18 @@ export class DosInstance {
                     changesBundle = await emulatorsUi.persist.load(persistKey, emulators);
                 }
                 const bundle = await bundlePromise;
-                this.ciPromise = emulators[this.emulatorFunction]([bundle, changesBundle]);
+                if (this.emulatorFunction === "backend") {
+                    this.ciPromise = emulators.backend([bundle, changesBundle], (this as any).createTransportLayer() as TransportLayer);
+                } else {
+                    this.ciPromise = emulators[this.emulatorFunction]([bundle, changesBundle]);
+                }
             } catch {
                 const bundle = await bundlePromise;
-                this.ciPromise = emulators[this.emulatorFunction]([bundle]);
+                if (this.emulatorFunction === "backend") {
+                    this.ciPromise = emulators.backend([bundle], (this as any).createTransportLayer() as TransportLayer);
+                } else {
+                    this.ciPromise = emulators[this.emulatorFunction]([bundle]);
+                }
             }
         }
 
