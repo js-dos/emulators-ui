@@ -45,9 +45,9 @@ export function webGl(layers: Layers, ci: CommandInterface) {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 
-    const pixel = new Uint8Array([0, 0, 0, 255]);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA,
-                  1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE,
+    const pixel = new Uint8Array([0, 0, 0]);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB,
+                  1, 1, 0, gl.RGB, gl.UNSIGNED_BYTE,
                   pixel);
 
     gl.useProgram(shaderProgram);
@@ -93,11 +93,11 @@ export function webGl(layers: Layers, ci: CommandInterface) {
         onResize();
     };
     ci.events().onFrameSize(onResizeFrame);
-    ci.events().onFrame((rgba) => {
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA,
-                      frameWidth, frameHeight, 0, gl.RGBA, gl.UNSIGNED_BYTE,
-                      rgba);
-        gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
+    ci.events().onFrame((frame) => {
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB,
+                      frameWidth, frameHeight, 0, gl.RGB, gl.UNSIGNED_BYTE,
+                      frame);
+        gl.drawArrays(gl.TRIANGLES, 0, 6);
     });
 
     onResizeFrame(ci.width(), ci.height());
@@ -143,6 +143,8 @@ function initBuffers(gl: WebGLRenderingContext, vertexPosition: number, textureC
     -1.0, -1.0,  0.0,
      1.0, -1.0,  0.0,
      1.0,  1.0,  0.0,
+    -1.0, -1.0,  0.0,
+     1.0,  1.0,  0.0,
     -1.0,  1.0,  0.0,
   ];
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
@@ -155,6 +157,8 @@ function initBuffers(gl: WebGLRenderingContext, vertexPosition: number, textureC
     0.0,  1.0,
     1.0,  1.0,
     1.0,  0.0,
+    0.0,  1.0,
+    1.0,  0.0,
     0.0,  0.0,
   ];
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(textureCoordinates),
@@ -162,12 +166,4 @@ function initBuffers(gl: WebGLRenderingContext, vertexPosition: number, textureC
 
   gl.vertexAttribPointer(textureCoord, 2, gl.FLOAT, false, 0, 0);
   gl.enableVertexAttribArray(textureCoord);
-
-  const indexBuffer = gl.createBuffer();
-  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
-  const indices = [
-    0,  1,  2,      0,  2,  3,
-  ];
-  gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,
-      new Uint16Array(indices), gl.STATIC_DRAW);
 }

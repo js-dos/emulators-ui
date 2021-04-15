@@ -45,6 +45,11 @@ export function audioNode(ci: CommandInterface) {
     const sampleRate = ci.soundFrequency();
     const channels = 1;
 
+    if (sampleRate === 0) {
+        console.warn("Can't create audio node with sampleRate === 0, ingnoring");
+        return;
+    }
+
     let audioContext: AudioContext | null = null;
 
     if (typeof AudioContext !== 'undefined') {
