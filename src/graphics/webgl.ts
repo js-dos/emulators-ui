@@ -93,10 +93,10 @@ export function webGl(layers: Layers, ci: CommandInterface) {
         onResize();
     };
     ci.events().onFrameSize(onResizeFrame);
-    ci.events().onFrame((frame) => {
+    ci.events().onFrame((rgb) => {
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB,
                       frameWidth, frameHeight, 0, gl.RGB, gl.UNSIGNED_BYTE,
-                      frame);
+                      rgb);
         gl.drawArrays(gl.TRIANGLES, 0, 6);
     });
 

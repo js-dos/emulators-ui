@@ -1,5 +1,6 @@
 import { layers } from "./dom/layers";
 import { resolveBundle } from "./network/xhr";
+import { _2d } from "./graphics/_2d";
 import { webGl } from "./graphics/webgl";
 import { video } from "./graphics/video";
 import { keyboard } from "./controls/keyboard";
@@ -25,6 +26,7 @@ export class EmulatorsUi {
 
     graphics = {
         webGl, // default webgl renderer
+        _2d, // fallback renderer
         video, // default janus renderer
     };
 

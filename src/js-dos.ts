@@ -103,7 +103,12 @@ export class DosInstance {
             emulatorsUi.graphics.video(this.layers, ci);
         } else {
             emulatorsUi.persist.save(persistKey, this.layers, ci, emulators);
-            emulatorsUi.graphics.webGl(this.layers, ci);
+            try {
+                emulatorsUi.graphics.webGl(this.layers, ci);
+            } catch (e) {
+                console.error("Unable to create webgl canvas, fallback to 2d rendering");
+                emulatorsUi.graphics._2d(this.layers, ci);
+            }
             emulatorsUi.sound.audioNode(ci);
         }
 
