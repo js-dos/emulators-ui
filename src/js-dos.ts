@@ -2,11 +2,10 @@ import { Emulators, CommandInterface } from "emulators";
 import { TransportLayer } from "emulators/dist/types/protocol/protocol";
 import { EmulatorsUi } from "./emulators-ui";
 import { Layers, LayersOptions } from "./dom/layers";
-import { Button } from "./controls/button";
-import { EventMapping } from "./controls/nipple";
-import { Mapper } from "./controls/keyboard";
 import { Build } from "./build";
-import { MouseMode, MouseProps } from "./controls/mouse";
+
+import { extractLayersConfig, LegacyLayersConfig, LayersConfig } from "./controls/layers-config";
+import { initLegacyLayersControl } from "./controls/legacy-layers-control";
 
 declare const emulators: Emulators;
 
@@ -26,12 +25,12 @@ export class DosInstance {
     emulatorFunction: EmulatorFunction;
     createTransportLayer?: () => TransportLayer;
     layers: Layers;
+    layersConfig: LayersConfig | LegacyLayersConfig | null = null;
     ciPromise?: Promise<CommandInterface>;
 
-    enableMobileControls: () => void = () => {/**/};
-    disableMobileControls: () => void = () => {/**/};
-
     private clickToStart: boolean;
+    private unbindControls: () => void = () => {/**/};
+    private storedLayersConfig: LayersConfig | LegacyLayersConfig | null = null;
 
     constructor(root: HTMLDivElement, emulatorsUi: EmulatorsUi, options: DosOptions) {
         if (DosInstance.initialRun) {
@@ -53,8 +52,92 @@ export class DosInstance {
 
     async run(bundleUrl: string, optionalChangesUrl?: string): Promise<CommandInterface> {
         await this.stop();
-        const emulatorsUi = this.emulatorsUi;
+        this.layers.setLoadingMessage("Starting...");
+
         const persistKey = bundleUrl + ".changes";
+
+        let ci: CommandInterface;
+        try {
+            ci = await this.runBundle(bundleUrl, optionalChangesUrl, persistKey);
+        } catch (e) {
+            this.layers.setLoadingMessage("Unexpected error occured...");
+            this.layers.notyf.error({ message: "Can't start emulator look browser logs for more info"});
+            console.error(e);
+            throw e;
+        }
+
+        const emulatorsUi = this.emulatorsUi;
+        if (this.emulatorFunction === "janus") {
+            emulatorsUi.graphics.video(this.layers, ci);
+        } else {
+            emulatorsUi.persist.save(persistKey, this.layers, ci, emulators);
+            try {
+                emulatorsUi.graphics.webGl(this.layers, ci);
+            } catch (e) {
+                console.error("Unable to create webgl canvas, fallback to 2d rendering");
+                emulatorsUi.graphics._2d(this.layers, ci);
+            }
+            emulatorsUi.sound.audioNode(ci);
+        }
+
+        this.layers.setLoadingMessage("Waiting for config...");
+        const config = await ci.config();
+        this.setLayersConfig(extractLayersConfig(config))
+
+        this.layers.setLoadingMessage("Ready");
+        this.layers.hideLoadingLayer();
+
+        if (this.clickToStart) {
+            this.layers.showClickToStart();
+        }
+
+        return ci;
+    }
+
+    async stop(): Promise<void> {
+        this.layers.showLoadingLayer();
+
+        if (this.ciPromise === undefined) {
+            return;
+        }
+
+        const ci = await this.ciPromise;
+        delete this.ciPromise;
+        await ci.exit();
+
+        return;
+    }
+
+    public async setLayersConfig(config: LayersConfig | LegacyLayersConfig | null)  {
+        this.layersConfig = config;
+
+        this.unbindControls();
+        this.unbindControls = () => {/**/};
+
+        if (config === null || this.ciPromise === undefined) {
+            return;
+        }
+
+        const ci = await this.ciPromise;
+        if (config.version === undefined) {
+            this.unbindControls = initLegacyLayersControl(this.layers, config as LegacyLayersConfig, ci, this.emulatorsUi);
+        } else {
+            console.log("Not supported yet");
+        }
+    }
+
+    public enableMobileControls() {
+        this.setLayersConfig(this.storedLayersConfig);
+        this.storedLayersConfig = null;
+    }
+
+    public disableMobileControls() {
+        this.storedLayersConfig = this.layersConfig;
+        this.setLayersConfig(null);
+    }
+
+    private async runBundle(bundleUrl: string, optionalChangesUrl: string | undefined, persistKey: string) {
+        const emulatorsUi = this.emulatorsUi;
         if (this.emulatorFunction === "janus") {
             this.layers.setLoadingMessage("Connecting...");
             this.ciPromise = emulators.janus(bundleUrl);
@@ -88,145 +171,8 @@ export class DosInstance {
             }
         }
 
-        let ci: CommandInterface;
-        try {
-            this.layers.setLoadingMessage("Starting...");
-            ci = await this.ciPromise;
-        } catch (e) {
-            this.layers.setLoadingMessage("Unexpected error occured...");
-            this.layers.notyf.error({ message: "Can't start emulator look browser logs for more info"});
-            console.error(e);
-            throw e;
-        }
-
-        if (this.emulatorFunction === "janus") {
-            emulatorsUi.graphics.video(this.layers, ci);
-        } else {
-            emulatorsUi.persist.save(persistKey, this.layers, ci, emulators);
-            try {
-                emulatorsUi.graphics.webGl(this.layers, ci);
-            } catch (e) {
-                console.error("Unable to create webgl canvas, fallback to 2d rendering");
-                emulatorsUi.graphics._2d(this.layers, ci);
-            }
-            emulatorsUi.sound.audioNode(ci);
-        }
-
-
-        this.layers.setLoadingMessage("Waiting for config...");
-        const config = await ci.config();
-        const layersConfig = extractLayersConfig(config);
-        const layersNames = Object.keys(layersConfig);
-
-        const unbind = {
-            keyboard: () => {/**/},
-            mouse: () => {/**/},
-            gestures: () => {/**/},
-            buttons: () => {/**/},
-        };
-
-        let currentLayer = "";
-        const changeControlLayer = (layerName: string) => {
-            unbind.keyboard();
-            unbind.mouse();
-            unbind.gestures();
-            unbind.buttons();
-
-            unbind.keyboard = () => {/**/};
-            unbind.mouse = () => {/**/};
-            unbind.gestures = () => {/**/};
-            unbind.buttons = () => {/**/};
-
-            currentLayer = layerName;
-            const layer = layersConfig[layerName];
-            if (layer === undefined) {
-                return;
-            }
-
-            const mouseProps: MouseProps = {
-                pointerButton: 0,
-                mode: MouseMode.DEFAULT,
-            };
-
-            unbind.keyboard = emulatorsUi.controls.keyboard(this.layers, ci, layer.mapper);
-
-            if (layer.gestures !== undefined && layer.gestures.length > 0) {
-                unbind.gestures = emulatorsUi.controls.nipple(this.layers, ci, layer.gestures);
-            } else {
-                unbind.mouse = emulatorsUi.controls.mouse(this.layers, ci, mouseProps);
-            }
-
-            if (layer.buttons !== undefined && layer.buttons.length) {
-                unbind.buttons = emulatorsUi.controls.button(this.layers, ci, layer.buttons, mouseProps);
-            }
-        }
-
-        this.disableMobileControls = () => {
-            unbind.gestures();
-            unbind.buttons();
-            unbind.gestures = () => {/**/};
-            unbind.buttons = () => {/**/};
-        }
-
-        this.enableMobileControls = () => {
-            changeControlLayer(currentLayer);
-        }
-
-        emulatorsUi.controls.options(this.layers, ci, layersNames, changeControlLayer);
-        changeControlLayer("default");
-
-        this.layers.setLoadingMessage("Ready");
-        this.layers.hideLoadingLayer();
-
-        if (this.clickToStart) {
-            this.layers.showClickToStart();
-        }
-
-        return ci;
-    }
-
-    async stop(): Promise<void> {
-        this.layers.showLoadingLayer();
-
-        if (this.ciPromise === undefined) {
-            return;
-        }
-
-        const ci = await this.ciPromise;
-        delete this.ciPromise;
-        await ci.exit();
-
-        return;
+        return this.ciPromise;
     }
 }
 
 export type DosFactoryType = (root: HTMLDivElement, options?: DosOptions) => DosInstance;
-
-
-interface LayerConfig {
-    name: string,
-    buttons: Button[],
-    gestures: EventMapping[],
-    mapper: Mapper,
-};
-
-type LayersConfig = {[index: string]: LayerConfig};
-
-function extractLayersConfig(config: any): LayersConfig {
-    if (config.layers !== undefined) {
-        return config.layers;
-    }
-
-    const gestures = config.gestures;
-    const buttons = config.buttons;
-    const mapper = config.mapper;
-
-    return {
-        default: {
-            name: "fallback",
-            gestures: gestures || [],
-            buttons: buttons || [],
-            mapper: mapper || {},
-        }
-    };
-}

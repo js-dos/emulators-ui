@@ -171,7 +171,7 @@ export function mouse(layers: Layers,
         el.addEventListener(next, onLeave, options);
     }
 
-    const exitFn = () => {
+    return () => {
         for (const next of pointer.starters) {
             el.removeEventListener(next, onStart, options);
         }
@@ -188,7 +188,4 @@ export function mouse(layers: Layers,
             el.removeEventListener(next, onLeave, options);
         }
     };
-
-    ci.events().onExit(exitFn);
-    return exitFn;
 }

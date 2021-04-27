@@ -12,6 +12,7 @@ import { domToKeyCode, domToKeyCodes, keyCodesToDom, namedKeyCodes } from "./dom
 import { audioNode } from "./sound/audio-node";
 import { notyf } from "./notification/notyf";
 import { save, load } from "./persist/save-load";
+import { getGrid } from "./controls/grid";
 
 import { DosInstance, DosFactoryType, DosOptions } from "./js-dos";
 
@@ -40,7 +41,8 @@ export class EmulatorsUi {
     };
 
     controls = {
-        namedKeyCodes, // mappinf from key name to it's key code
+        getGrid, // returns grid processor by grid type
+        namedKeyCodes, // mapping from key name to it's key code
         domToKeyCodes, // mapping from DOM key codes to js-dos key codes
         domToKeyCode, // function that converts DOM key code to js-dos key code
         keyCodesToDom, // mapping from js-dos key codes to DOM key codes

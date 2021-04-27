@@ -7,7 +7,6 @@ import Keyboard from "simple-keyboard";
 import { domToKeyCode, KBD_enter, KBD_leftshift, KBD_backspace, KBD_capslock, KBD_tab, KBD_space, KBD_esc, KBD_leftctrl, KBD_leftalt } from "../dom/keys";
 
 export function options(layers: Layers,
-                        ci: CommandInterface,
                         layersNames: string[],
                         onLayerChange: (layer: string) => void) {
     const scale = layers.getScale();
@@ -140,12 +139,13 @@ export function options(layers: Layers,
     layers.mouseOverlay.appendChild(container);
     layers.mouseOverlay.appendChild(keyboardDiv);
     layers.toggleKeyboard = toggleKeyboard;
-    ci.events().onExit(() => {
+
+    return () => {
         layers.toggleKeyboard = () => false;
         layers.mouseOverlay.removeChild(container);
         layers.mouseOverlay.removeChild(keyboardDiv);
         layers.setOnFullscreen(() => {/**/});
-    });
+    };
 }
 
 function createSelectForLayers(layers: string[], onChange: (layer: string) => void) {

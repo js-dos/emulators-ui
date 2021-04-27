@@ -156,15 +156,13 @@ export function button(layers: Layers,
         toRemove.push(button);
     }
 
-    const exitFn = () => {
+    return () => {
         for (const next of toRemove) {
             if (next.parentElement === layers.mouseOverlay) {
                 layers.mouseOverlay.removeChild(next);
             }
         }
     };
-    ci.events().onExit(exitFn);
-    return exitFn;
 }
 
 function createDiv(className: string, innerHtml?: string) {
