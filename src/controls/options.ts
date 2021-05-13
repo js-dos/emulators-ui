@@ -1,6 +1,6 @@
 import { CommandInterface } from "emulators";
 import { Layers } from "../dom/layers";
-import { createButton, ButtonSize } from "./button";
+import { createButton } from "./button";
 import { pointer } from "./pointer";
 
 import Keyboard from "simple-keyboard";
@@ -8,8 +8,10 @@ import { domToKeyCode, KBD_enter, KBD_leftshift, KBD_backspace, KBD_capslock, KB
 
 export function options(layers: Layers,
                         layersNames: string[],
-                        onLayerChange: (layer: string) => void) {
-    const size = Math.round(ButtonSize);
+                        onLayerChange: (layer: string) => void,
+                        size: number,
+                        top: number,
+                        right: number) {
     const ident = Math.round(size / 4);
 
     let controlsVisbile = false;
@@ -81,7 +83,7 @@ export function options(layers: Layers,
                     updateVisibility();
                 }
             },
-        }),
+        }, size),
         createButton("save", {
             onClick: () => {
                 layers.save();
@@ -90,7 +92,7 @@ export function options(layers: Layers,
                     toggleOptions();
                 }
             }
-        }),
+        }, size),
         createButton("fullscreen", {
             onClick: () => {
                 layers.toggleFullscreen();
@@ -99,10 +101,10 @@ export function options(layers: Layers,
                     toggleOptions();
                 }
             },
-        }),
+        }, size),
         createButton("options", {
             onClick: toggleOptions,
-        })
+        }, size)
     ];
     const options = children[children.length - 1];
     const fullscreen = children[children.length - 2].children[0];
@@ -118,6 +120,10 @@ export function options(layers: Layers,
         }
     });
 
+    if (layers.fullscreen) {
+        fullscreen.classList.add("emulator-control-exit-fullscreen-icon");
+    }
+
     const container = createDiv("emulator-options");
     for (const next of children) {
         if (next !== options) {
@@ -132,8 +138,8 @@ export function options(layers: Layers,
     }
 
     container.style.position = "absolute";
-    container.style.right = "0";
-    container.style.top = ident + "px";
+    container.style.right = right + "px";
+    container.style.top = top + "px";
 
     layers.mouseOverlay.appendChild(container);
     layers.mouseOverlay.appendChild(keyboardDiv);

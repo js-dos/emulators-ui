@@ -49,12 +49,12 @@ export function initLegacyLayersControl(
         }
 
         if (layer.buttons !== undefined && layer.buttons.length) {
-            unbind.buttons = emulatorsUi.controls.button(layers, ci, layer.buttons, mouseProps);
+            unbind.buttons = emulatorsUi.controls.button(layers, ci, layer.buttons, mouseProps, 54);
         }
     }
 
 
-    const unbindOptions = emulatorsUi.controls.options(layers, layersNames, changeControlLayer);
+    const unbindOptions = emulatorsUi.controls.options(layers, layersNames, changeControlLayer, 54, 54 / 4, 0);
     changeControlLayer("default");
 
     return () => {

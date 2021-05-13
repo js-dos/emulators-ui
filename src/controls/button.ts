@@ -5,8 +5,6 @@ import { pointer } from "./pointer";
 import { LayoutPosition } from "./layout";
 import { MouseProps, MouseMode } from "./mouse";
 
-export const ButtonSize = 54;
-
 export type ActionType = "click" | "hold";
 // hold - means track press/release events separately
 
@@ -38,7 +36,7 @@ export interface ButtonHandler {
 
 export function createButton(symbol: string,
                              handler: ButtonHandler,
-                             size: number = ButtonSize) {
+                             size: number) {
     const innerSize = Math.round(size * 0.6);
     const innerTextSize = Math.round(size * 0.5);
     const borderWidth = Math.max(1, Math.round(size / 20));
@@ -47,7 +45,7 @@ export function createButton(symbol: string,
     const button = createDiv("emulator-button-touch-zone");
     const innerButton = createDiv("emulator-button");
     const innerText = createDiv("emulator-button-text",
-                                (text === undefined || text.length === 0) ? "□" : text.substr(0, 1).toUpperCase());
+                                backgroundImage === undefined ? ((text === undefined || text.length === 0) ? "□" : text.substr(0, 1).toUpperCase()) : "");
 
     if (backgroundImage !== undefined) {
         innerButton.style.backgroundImage = "url(\"" + backgroundImage + "\")";
@@ -107,8 +105,8 @@ export function createButton(symbol: string,
 export function button(layers: Layers,
                        ci: CommandInterface,
                        buttons: Button[],
-                       mouseProps: MouseProps) {
-    const size = ButtonSize; 
+                       mouseProps: MouseProps,
+                       size: number) {
     const ident = Math.round(size / 4);
     const toRemove: HTMLElement[] = [];
 
@@ -119,7 +117,7 @@ export function button(layers: Layers,
 
         const symbol = (next.symbol || mapToSymbol(next.mapTo)).toUpperCase();
         const handler = createHandler(next, layers, mouseProps);
-        const button = createButton(symbol, handler);
+        const button = createButton(symbol, handler, size);
 
         button.style.position = "absolute";
         const cssStyle = (next as any).style;

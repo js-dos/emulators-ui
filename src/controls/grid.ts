@@ -12,6 +12,8 @@ export interface GridConfiguration {
     rowHeight: number;
     columnsPadding: number;
     rowsPadding: number;
+    width: number;
+    height: number;
 }
 
 export interface Grid {
@@ -54,6 +56,8 @@ function getSquareGrid(): Grid {
                 rowHeight,
                 columnsPadding,
                 rowsPadding,
+                width,
+                height,
             };
         }
 
@@ -100,6 +104,8 @@ function getHoneyCombGrid(): Grid {
                 rowHeight,
                 columnsPadding,
                 rowsPadding,
+                width,
+                height
             };
         }
 

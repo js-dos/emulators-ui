@@ -3,8 +3,8 @@ import { EmulatorsUi } from "./../emulators-ui";
 import { MouseMode, MouseProps } from "./mouse";
 import { Layers } from "../dom/layers";
 import { CommandInterface } from "emulators";
-import { LayersConfig, LayerConfig, LayerKeyControl } from "./layers-config";
-import { getGrid } from "./grid";
+import { LayersConfig, LayerConfig, LayerKeyControl, LayerControl } from "./layers-config";
+import { getGrid, GridConfiguration } from "./grid";
 import { createButton } from "./button";
 
 export function initLayersControl(
@@ -14,6 +14,17 @@ export function initLayersControl(
     emulatorsUi: EmulatorsUi) {
     return initLayerConfig(Object.values(layersConfig.layers)[0], layers, ci, emulatorsUi);
 }
+
+type ControlFactory = (keyControl: any,
+                       layers: Layers,
+                       ci: CommandInterface,
+                       gridConfig: GridConfiguration,
+                       emulatorsUi: EmulatorsUi) => () => void;
+
+const factoryMapping: {[type: string]: ControlFactory} = {
+    Key: createKeyControl,
+    Options: createOptionsControl,
+};
 
 function initLayerConfig(layerConfig: LayerConfig,
                          layers: Layers,
@@ -35,28 +46,16 @@ function initLayerConfig(layerConfig: LayerConfig,
         unbindControls.splice(0, unbindControls.length);
 
         const grid = getGrid(layerConfig.grid);
-        const { cells, columnWidth, rowHeight, columnsPadding, rowsPadding } = grid.getConfiguration(width, height);
+        const gridConfig = grid.getConfiguration(width, height);
         for (const next of layerConfig.controls) {
-            const { row, column, type } = next;
-            const { centerX, centerY } = cells[row][column];
-
-            if (type === "Key") {
-                const keyControl = next as LayerKeyControl;
-                const button = createButton(keyControl.symbol, {
-                    onDown: () => ci.sendKeyEvent(keyControl.mapTo, true),
-                    onUp: () => ci.sendKeyEvent(keyControl.mapTo, false),
-                }, columnWidth);
-
-                button.style.position = "absolute";
-                button.style.left = (centerX - columnWidth / 2) + "px";
-                button.style.top = (centerY - rowHeight / 2) + "px";
-
-                layers.mouseOverlay.appendChild(button);
-                unbindControls.push(() => {
-                    layers.mouseOverlay.removeChild(button);
-                });
+            const factory = factoryMapping[next.type];
+            if (factory === undefined) {
+                console.error("Factory for control '" + next.type + "' is not defined");
+                continue;
             }
 
+            const unbind = factory(next, layers, ci, gridConfig, emulatorsUi);
+            unbindControls.push(unbind);
         }
     }
 
@@ -71,4 +70,45 @@ function initLayerConfig(layerConfig: LayerConfig,
             next();
         }
     };
+}
+
+function createKeyControl(keyControl: LayerKeyControl,
+                          layers: Layers,
+                          ci: CommandInterface,
+                          gridConfig: GridConfiguration,
+                          emulatorsUi: EmulatorsUi) {
+    const { cells, columnWidth, rowHeight } = gridConfig;
+    const { row, column } = keyControl;
+    const { centerX, centerY } = cells[row][column];
+
+    const button = createButton(keyControl.symbol, {
+        onDown: () => ci.sendKeyEvent(keyControl.mapTo, true),
+        onUp: () => ci.sendKeyEvent(keyControl.mapTo, false),
+    }, columnWidth);
+
+    button.style.position = "absolute";
+    button.style.left = (centerX - columnWidth / 2) + "px";
+    button.style.top = (centerY - rowHeight / 2) + "px";
+
+    layers.mouseOverlay.appendChild(button);
+    return () => layers.mouseOverlay.removeChild(button);
+}
+
+function createOptionsControl(keyControl: LayerControl,
+                              layers: Layers,
+                              ci: CommandInterface,
+                              gridConfig: GridConfiguration,
+                              emulatorsUi: EmulatorsUi) {
+    const { cells, columnWidth, rowHeight } = gridConfig;
+    const { row, column } = keyControl;
+    const { centerX, centerY } = cells[row][column];
+
+    const top = centerY - rowHeight / 2;
+    const left = centerX - columnWidth / 2;
+    const right = gridConfig.width - left - columnWidth;
+
+    return emulatorsUi.controls.options(layers, ["default"], () => {},
+                                        columnWidth,
+                                        top,
+                                        right);
 }

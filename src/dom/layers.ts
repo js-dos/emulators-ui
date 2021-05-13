@@ -21,6 +21,8 @@ export class Layers {
     mouseOverlay: HTMLDivElement;
     width: number;
     height: number;
+    fullscreen: boolean = false;
+
     notyf = new Notyf();
     toggleKeyboard: () => boolean = () => false;
 
@@ -34,7 +36,6 @@ export class Layers {
 
     private onSave: () => Promise<void>;
 
-    private fullscreen: boolean = false;
     private onFullscreenChanged: (fullscreen: boolean) => void = () => {/**/};
 
     constructor(root: HTMLDivElement, options: LayersOptions) {

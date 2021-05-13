@@ -42,6 +42,10 @@ export interface LegacyLayerConfig {
 export type LegacyLayersConfig = {[index: string]: LegacyLayerConfig};
 
 export function extractLayersConfig(config: any): LayersConfig | LegacyLayersConfig | null {
+    if (config.layersConfig !== undefined) {
+        return config.layersConfig;
+    }
+
     if (config.layers !== undefined) {
         return config.layers;
     }

@@ -16,7 +16,7 @@ export function initNullLayersControl(
 
     const unbindKeyboard = emulatorsUi.controls.keyboard(layers, ci);
     const unbindMouse = emulatorsUi.controls.mouse(layers, ci, mouseProps);
-    const unbindOptions = emulatorsUi.controls.options(layers, ["default"], () => {/**/});
+    const unbindOptions = emulatorsUi.controls.options(layers, ["default"], () => {/**/}, 54, 54 / 4, 0);
 
     return () => {
         unbindKeyboard();
