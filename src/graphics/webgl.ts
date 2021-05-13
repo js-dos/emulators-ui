@@ -82,7 +82,7 @@ export function webGl(layers: Layers, ci: CommandInterface) {
         containerHeight = h;
         onResize();
     }
-    layers.setOnResize(onResizeLayer);
+    layers.addOnResize(onResizeLayer);
 
     const onResizeFrame = (w: number, h: number) => {
         frameWidth = w;
@@ -103,7 +103,7 @@ export function webGl(layers: Layers, ci: CommandInterface) {
     onResizeFrame(ci.width(), ci.height());
 
     ci.events().onExit(() => {
-        layers.setOnResize(() => { /**/ });
+        layers.removeOnResize(onResizeLayer);
     });
 }
 

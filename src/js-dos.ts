@@ -5,7 +5,10 @@ import { Layers, LayersOptions } from "./dom/layers";
 import { Build } from "./build";
 
 import { extractLayersConfig, LegacyLayersConfig, LayersConfig } from "./controls/layers-config";
+
 import { initLegacyLayersControl } from "./controls/legacy-layers-control";
+import { initNullLayersControl } from "./controls/null-layers-control";
+import { initLayersControl } from "./controls/layers-control";
 
 declare const emulators: Emulators;
 
@@ -109,20 +112,21 @@ export class DosInstance {
     }
 
     public async setLayersConfig(config: LayersConfig | LegacyLayersConfig | null)  {
-        this.layersConfig = config;
-
-        this.unbindControls();
-        this.unbindControls = () => {/**/};
-
-        if (config === null || this.ciPromise === undefined) {
+        if (this.ciPromise === undefined) {
             return;
         }
 
         const ci = await this.ciPromise;
-        if (config.version === undefined) {
+
+        this.layersConfig = config;
+        this.unbindControls();
+
+        if (config === null) {
+            this.unbindControls = initNullLayersControl(this.layers, ci, this.emulatorsUi);
+        } else if (config.version === undefined) {
             this.unbindControls = initLegacyLayersControl(this.layers, config as LegacyLayersConfig, ci, this.emulatorsUi);
         } else {
-            console.log("Not supported yet");
+            this.unbindControls = initLayersControl(this.layers, config as LayersConfig, ci, this.emulatorsUi);
         }
     }
 

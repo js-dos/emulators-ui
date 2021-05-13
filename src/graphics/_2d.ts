@@ -36,7 +36,7 @@ export function _2d(layers: Layers, ci: CommandInterface) {
         containerHeight = h;
         onResize();
     }
-    layers.setOnResize(onResizeLayer);
+    layers.addOnResize(onResizeLayer);
 
     let rgba = new Uint8ClampedArray(0);
     const onResizeFrame = (w: number, h: number) => {
@@ -65,6 +65,6 @@ export function _2d(layers: Layers, ci: CommandInterface) {
     onResizeFrame(ci.width(), ci.height());
 
     ci.events().onExit(() => {
-        layers.setOnResize(() => { /**/ });
+        layers.removeOnResize(onResizeLayer);
     });
 }

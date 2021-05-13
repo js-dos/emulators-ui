@@ -3,7 +3,6 @@ import { Layers } from "../dom/layers";
 import { namedKeyCodes, KBD_NONE } from "../dom/keys";
 import { pointer } from "./pointer";
 import { LayoutPosition } from "./layout";
-import { type } from "os";
 import { MouseProps, MouseMode } from "./mouse";
 
 export const ButtonSize = 54;
@@ -39,28 +38,29 @@ export interface ButtonHandler {
 
 export function createButton(symbol: string,
                              handler: ButtonHandler,
-                             scale: number) {
-    const size = Math.round(Math.max(16, ButtonSize * scale));
-    const innerSize = Math.round(size / 1.8);
+                             size: number = ButtonSize) {
+    const innerSize = Math.round(size * 0.6);
+    const innerTextSize = Math.round(size * 0.5);
+    const borderWidth = Math.max(1, Math.round(size / 20));
     const backgroundImage = symbolToUrl[symbol.toLowerCase()];
     const text = backgroundImage === undefined ? symbol : "";
     const button = createDiv("emulator-button-touch-zone");
-    const innerButton = createDiv("emulator-button", text === undefined ? "□" : text);
+    const innerButton = createDiv("emulator-button");
+    const innerText = createDiv("emulator-button-text",
+                                (text === undefined || text.length === 0) ? "□" : text.substr(0, 1).toUpperCase());
 
     if (backgroundImage !== undefined) {
         innerButton.style.backgroundImage = "url(\"" + backgroundImage + "\")";
     }
     innerButton.style.width = innerSize + "px";
     innerButton.style.height = innerSize + "px";
-    innerButton.style.lineHeight = innerSize + "px";
-    innerButton.style.fontSize = Math.round(innerSize / 2) + "px";
+    innerText.style.fontSize = innerTextSize + "px";
 
-    button.style.width = size + "px";
-    button.style.height = size + "px";
-    button.style.lineHeight = size + "px";
-    button.style.fontSize = Math.round(size / 2) + "px";
-    button.style.borderWidth = Math.max(1, Math.round(size / 20)) + "px";
+    button.style.width = size - borderWidth * 2 + "px";
+    button.style.height = size - borderWidth * 2 + "px";
+    button.style.borderWidth = borderWidth + "px";
     button.appendChild(innerButton);
+    button.appendChild(innerText);
 
     const onStart = (e: Event) => {
         if (handler.onDown !== undefined) {
@@ -108,8 +108,7 @@ export function button(layers: Layers,
                        ci: CommandInterface,
                        buttons: Button[],
                        mouseProps: MouseProps) {
-    const scale = layers.getScale();
-    const size = Math.round(ButtonSize * scale);
+    const size = ButtonSize; 
     const ident = Math.round(size / 4);
     const toRemove: HTMLElement[] = [];
 
@@ -120,7 +119,7 @@ export function button(layers: Layers,
 
         const symbol = (next.symbol || mapToSymbol(next.mapTo)).toUpperCase();
         const handler = createHandler(next, layers, mouseProps);
-        const button = createButton(symbol, handler, scale);
+        const button = createButton(symbol, handler);
 
         button.style.position = "absolute";
         const cssStyle = (next as any).style;

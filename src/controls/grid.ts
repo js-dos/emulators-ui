@@ -58,11 +58,11 @@ function getSquareGrid(): Grid {
         }
 
         private getCols() {
-            return 11;
+            return 10;
         }
 
         private getRows() {
-            return Math.floor(this.getCols() * this.aspect);
+            return Math.floor(this.getCols() * this.aspect) + 1;
         }
     };
 
@@ -104,11 +104,11 @@ function getHoneyCombGrid(): Grid {
         }
 
         getCols() {
-            return 11;
+            return 10;
         }
 
         getRows() {
-            return Math.floor(this.getCols() * this.aspect);
+            return Math.floor(this.getCols() * this.aspect) + 1;
         }
     };
 

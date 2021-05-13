@@ -9,8 +9,7 @@ import { domToKeyCode, KBD_enter, KBD_leftshift, KBD_backspace, KBD_capslock, KB
 export function options(layers: Layers,
                         layersNames: string[],
                         onLayerChange: (layer: string) => void) {
-    const scale = layers.getScale();
-    const size = Math.round(ButtonSize * scale);
+    const size = Math.round(ButtonSize);
     const ident = Math.round(size / 4);
 
     let controlsVisbile = false;
@@ -82,7 +81,7 @@ export function options(layers: Layers,
                     updateVisibility();
                 }
             },
-        }, scale),
+        }),
         createButton("save", {
             onClick: () => {
                 layers.save();
@@ -91,7 +90,7 @@ export function options(layers: Layers,
                     toggleOptions();
                 }
             }
-        }, scale),
+        }),
         createButton("fullscreen", {
             onClick: () => {
                 layers.toggleFullscreen();
@@ -100,10 +99,10 @@ export function options(layers: Layers,
                     toggleOptions();
                 }
             },
-        }, scale),
+        }),
         createButton("options", {
             onClick: toggleOptions,
-        }, scale)
+        })
     ];
     const options = children[children.length - 1];
     const fullscreen = children[children.length - 2].children[0];

@@ -4,10 +4,7 @@ import { Mapper } from "./keyboard";
 
 import { GridType } from "./grid";
 
-export enum LayerControlType {
-    Options = "Options",
-    Key = "Key",
-}
+export type LayerControlType = "Options" | "Key";
 
 export interface LayerPosition {
     column: number;
@@ -17,6 +14,10 @@ export interface LayerPosition {
 export interface LayerControl extends LayerPosition {
     type: LayerControlType,
     symbol: string;
+}
+
+export interface LayerKeyControl extends LayerControl {
+    mapTo: number;
 }
 
 export interface LayerConfig {

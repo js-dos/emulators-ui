@@ -7,13 +7,10 @@ const resizeDetector = elementResizeDetector({
 });
 
 export interface LayersOptions {
-    scale: number;
 }
 
 export function layers(root: HTMLDivElement, options?: LayersOptions) {
-    return new Layers(root, options || {
-        scale: 1
-    });
+    return new Layers(root, options || {});
 }
 
 export class Layers {
@@ -29,7 +26,7 @@ export class Layers {
 
     private clickToStart: HTMLDivElement;
     private loaderText: HTMLPreElement;
-    private onResize: (width: number, height: number) => void;
+    private onResize: ((width: number, height: number) => void)[];
 
     private onKeyDown: (keyCode: number) => void;
     private onKeyUp: (keyCode: number) => void;
@@ -39,10 +36,8 @@ export class Layers {
 
     private fullscreen: boolean = false;
     private onFullscreenChanged: (fullscreen: boolean) => void = () => {/**/};
-    private scale: number;
 
     constructor(root: HTMLDivElement, options: LayersOptions) {
-        this.scale = options.scale;
         this.root = root;
         this.root.classList.add("emulator-root");
 
@@ -73,7 +68,7 @@ export class Layers {
         this.width = root.offsetWidth;
         this.height = root.offsetHeight;
 
-        this.onResize = () => { /**/ };
+        this.onResize = [];
         this.onKeyDown = () => { /**/ };
         this.onKeyUp = () => { /**/ };
         this.onKeyPress = () => { /**/ };
@@ -86,7 +81,9 @@ export class Layers {
 
             this.width = el.offsetWidth;
             this.height = el.offsetHeight;
-            this.onResize(this.width, this.height);
+            for (const next of this.onResize) {
+                next(this.width, this.height);
+            }
         });
 
         this.initKeyEvents();
@@ -121,8 +118,12 @@ export class Layers {
         });
     }
 
-    setOnResize(handler: (width: number, height: number) => void) {
-        this.onResize = handler;
+    addOnResize(handler: (width: number, height: number) => void) {
+        this.onResize.push(handler);
+    }
+
+    removeOnResize(handler: (width: number, height: number) => void) {
+        this.onResize = this.onResize.filter((n) => n != handler);
     }
 
     setOnKeyDown(handler: (keyCode: number) => void) {
@@ -223,9 +224,6 @@ export class Layers {
         this.clickToStart.style.display = "flex";
     }
 
-    getScale() {
-        return this.scale;
-    }
 }
 
 function createDiv(className: string, innerHtml: string) {
