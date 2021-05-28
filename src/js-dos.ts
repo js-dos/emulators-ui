@@ -15,6 +15,7 @@ declare const emulators: Emulators;
 export type EmulatorFunction = "dosboxWorker" | "dosboxDirect" | "dosboxNode" | "janus" | "backend";
 
 export interface DosOptions {
+    noWebGL?: boolean;
     emulatorFunction?: EmulatorFunction;
     clickToStart?: boolean;
     layersOptions?: LayersOptions;
@@ -31,6 +32,8 @@ export class DosInstance {
     layersConfig: LayersConfig | LegacyLayersConfig | null = null;
     ciPromise?: Promise<CommandInterface>;
 
+    options: DosOptions;
+
     private clickToStart: boolean;
     private unbindControls: () => void = () => {/**/};
     private storedLayersConfig: LayersConfig | LegacyLayersConfig | null = null;
@@ -41,6 +44,7 @@ export class DosInstance {
             DosInstance.initialRun = false;
         }
 
+        this.options = options;
         this.emulatorsUi = emulatorsUi;
         this.emulatorFunction = options.emulatorFunction || "dosboxWorker";
         this.clickToStart = options.clickToStart || false;
@@ -75,6 +79,9 @@ export class DosInstance {
         } else {
             emulatorsUi.persist.save(persistKey, this.layers, ci, emulators);
             try {
+                if (this.options.noWebGL === true) {
+                    throw new Error("WebGL is disabled by options");
+                }
                 emulatorsUi.graphics.webGl(this.layers, ci);
             } catch (e) {
                 console.error("Unable to create webgl canvas, fallback to 2d rendering");
@@ -111,7 +118,7 @@ export class DosInstance {
         return;
     }
 
-    public async setLayersConfig(config: LayersConfig | LegacyLayersConfig | null)  {
+    public async setLayersConfig(config: LayersConfig | LegacyLayersConfig | null, layerName?: string) {
         if (this.ciPromise === undefined) {
             return;
         }
@@ -126,8 +133,12 @@ export class DosInstance {
         } else if (config.version === undefined) {
             this.unbindControls = initLegacyLayersControl(this.layers, config as LegacyLayersConfig, ci, this.emulatorsUi);
         } else {
-            this.unbindControls = initLayersControl(this.layers, config as LayersConfig, ci, this.emulatorsUi);
+            this.unbindControls = initLayersControl(this.layers, config as LayersConfig, ci, this, layerName);
         }
+    }
+
+    public getLayersConfig(): LayersConfig | LegacyLayersConfig | null {
+        return this.layersConfig;
     }
 
     public enableMobileControls() {

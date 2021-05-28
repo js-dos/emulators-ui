@@ -4,7 +4,7 @@ import { Mapper } from "./keyboard";
 
 import { GridType } from "./grid";
 
-export type LayerControlType = "Options" | "Key";
+export type LayerControlType = "Options" | "Key" | "Keyboard" | "Switch";
 
 export interface LayerPosition {
     column: number;
@@ -18,6 +18,10 @@ export interface LayerControl extends LayerPosition {
 
 export interface LayerKeyControl extends LayerControl {
     mapTo: number;
+}
+
+export interface LayerSwitchControl extends LayerControl {
+    layerName: string,
 }
 
 export interface LayerConfig {

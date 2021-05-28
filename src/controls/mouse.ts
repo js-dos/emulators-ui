@@ -1,6 +1,6 @@
 import { CommandInterface } from "emulators";
 import { Layers } from "../dom/layers";
-import { pointer, getPointerState } from "./pointer";
+import { pointer, getPointerState } from "../dom/pointer";
 
 export enum MouseMode {
     DEFAULT,

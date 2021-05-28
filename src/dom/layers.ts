@@ -1,5 +1,8 @@
-import { domToKeyCode } from "./keys";
 import { Notyf } from "notyf";
+import Keyboard from "simple-keyboard";
+import { createDiv, stopPropagation } from "./helpers";
+
+import { domToKeyCode, KBD_enter, KBD_leftshift, KBD_backspace, KBD_capslock, KBD_tab, KBD_space, KBD_esc, KBD_leftctrl, KBD_leftalt } from "./keys";
 
 // tslint:disable-next-line:no-var-requires
 const elementResizeDetector = require("element-resize-detector");
@@ -36,7 +39,8 @@ export class Layers {
 
     private onSave: () => Promise<void>;
 
-    private onFullscreenChanged: (fullscreen: boolean) => void = () => {/**/};
+    private onFullscreenChanged: (fullscreen: boolean) => void = () => {/**/ };
+    private onKeyboardChanged: ((visible: boolean) => void)[] = [];
 
     constructor(root: HTMLDivElement, options: LayersOptions) {
         this.root = root;
@@ -88,6 +92,7 @@ export class Layers {
         });
 
         this.initKeyEvents();
+        this.initKeyboard();
         this.preventContextMenu();
 
 
@@ -124,7 +129,7 @@ export class Layers {
     }
 
     removeOnResize(handler: (width: number, height: number) => void) {
-        this.onResize = this.onResize.filter((n) => n != handler);
+        this.onResize = this.onResize.filter((n) => n !== handler);
     }
 
     setOnKeyDown(handler: (keyCode: number) => void) {
@@ -190,6 +195,14 @@ export class Layers {
         this.onFullscreenChanged = onFullscreenChanged;
     }
 
+    setOnKeyboardVisibility(onKeyboardChanged: (visible: boolean) => void) {
+        this.onKeyboardChanged.push(onKeyboardChanged);
+    }
+
+    removeOnKeyboardVisibility(onKeyboardChanged: (visible: boolean) => void) {
+        this.onKeyboardChanged = this.onKeyboardChanged.filter((n) => n !== onKeyboardChanged);
+    }
+
     save(): Promise<void> {
         return this.onSave()
             .then(() => {
@@ -225,13 +238,53 @@ export class Layers {
         this.clickToStart.style.display = "flex";
     }
 
-}
+    private initKeyboard() {
+        let keyboardVisible = false;
 
-function createDiv(className: string, innerHtml: string) {
-    const el = document.createElement("div");
-    el.className = className;
-    el.innerHTML = innerHtml;
-    return el;
+        const layout = {
+            default: [
+                '{esc} ` 1 2 3 4 5 6 7 8 9 0 - = {bksp}',
+                'q w e r t y u i o p [ ] \\',
+                'a s d f g h j k l ; \' {enter}',
+                'z x c v b n m , . / {space}',
+            ],
+        };
+
+        const keyboardDiv = createDiv("emulator-keyboard");
+        keyboardDiv.style.display = "none";
+        stopPropagation(keyboardDiv);
+
+        new Keyboard(keyboardDiv, {
+            layout,
+            onKeyPress: button => {
+                const keyCode = buttonToCode(button);
+                if (keyCode !== 0) {
+                    this.fireKeyPress(keyCode);
+                }
+            },
+            preventMouseDownDefault: true,
+            preventMouseUpDefault: true,
+            stopMouseDownPropagation: true,
+            stopMouseUpPropagation: true,
+            autoUseTouchEvents: true,
+            useMouseEvents: true,
+        });
+
+
+        this.toggleKeyboard = () => {
+            keyboardVisible = !keyboardVisible;
+            const display = keyboardVisible ? "block" : "none";
+            keyboardDiv.style.display = display;
+
+            for (const next of this.onKeyboardChanged) {
+                next(keyboardVisible);
+            }
+
+            return keyboardVisible;
+        };
+
+        this.mouseOverlay.appendChild(keyboardDiv);
+    }
 }
 
 function createLoadingLayer() {
@@ -262,4 +315,35 @@ function createClickToStartLayer() {
 <div class="emulator-click-to-start-text">Press to start</div>
 <div class="emulator-click-to-start-icon"></div>
 `);
+}
+
+function buttonToCode(button: string) {
+    let keyCode = 0;
+    if (button.length > 1) {
+        if (button === "{enter}") {
+            keyCode = KBD_enter;
+        } else if (button === "{shift}") {
+            keyCode = KBD_leftshift;
+        } else if (button === "{bksp}") {
+            keyCode = KBD_backspace;
+        } else if (button === "{lock}") {
+            keyCode = KBD_capslock;
+        } else if (button === "{tab}") {
+            keyCode = KBD_tab;
+        } else if (button === "{space}") {
+            keyCode = KBD_space;
+        } else if (button === "{esc}") {
+            keyCode = KBD_esc;
+        } else if (button === "ctrl") {
+            keyCode = KBD_leftctrl;
+        } else if (button === "{alt}") {
+            keyCode = KBD_leftalt;
+        } else {
+            console.warn("Unknown button", button);
+        }
+    } else {
+        keyCode = domToKeyCode(button.toUpperCase().charCodeAt(0));
+    }
+
+    return keyCode;
 }

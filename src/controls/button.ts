@@ -1,7 +1,7 @@
 import { CommandInterface } from "emulators";
 import { Layers } from "../dom/layers";
 import { namedKeyCodes, KBD_NONE } from "../dom/keys";
-import { pointer } from "./pointer";
+import { pointer } from "../dom/pointer";
 import { LayoutPosition } from "./layout";
 import { MouseProps, MouseMode } from "./mouse";
 
