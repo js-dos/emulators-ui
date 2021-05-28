@@ -24,6 +24,11 @@ export interface LayerSwitchControl extends LayerControl {
     layerName: string,
 }
 
+export interface LayerScreenMoveControl extends LayerControl {
+    direction: "up" | "down" | "left" | "right" |
+        "up-left" | "up-right" | "down-left" | "down-right";
+}
+
 export interface LayerConfig {
     grid: GridType,
     title: string,

@@ -3,7 +3,7 @@ import { EmulatorsUi } from "./../emulators-ui";
 import { MouseMode, MouseProps } from "./mouse";
 import { Layers } from "../dom/layers";
 import { CommandInterface } from "emulators";
-import { LayersConfig, LayerConfig, LayerKeyControl, LayerControl, LayerSwitchControl } from "./layers-config";
+import { LayersConfig, LayerConfig, LayerKeyControl, LayerControl, LayerSwitchControl, LayerScreenMoveControl } from "./layers-config";
 import { getGrid, GridConfiguration } from "./grid";
 import { createButton } from "./button";
 import { DosInstance } from "../js-dos";
@@ -37,6 +37,7 @@ const factoryMapping: { [type: string]: ControlFactory } = {
     Options: createOptionsControl,
     Keyboard: createKeyboardControl,
     Switch: createSwitchControl,
+    ScreenMove: createScreenMoveControl,
 };
 
 function initLayerConfig(layerConfig: LayerConfig,
@@ -122,7 +123,7 @@ function createOptionsControl(keyControl: LayerControl,
     const left = centerX - columnWidth / 2;
     const right = gridConfig.width - left - columnWidth;
 
-    return emulatorsUi.controls.options(layers, ["default"], () => { },
+    return emulatorsUi.controls.options(layers, ["default"], () => {/**/},
         columnWidth,
         top,
         right);
@@ -172,6 +173,53 @@ function createSwitchControl(switchControl: LayerSwitchControl,
 
     const button = createButton(switchControl.symbol, {
         onUp: () => dosInstance.setLayersConfig(dosInstance.getLayersConfig(), switchControl.layerName),
+    }, columnWidth);
+
+    button.style.position = "absolute";
+    button.style.left = (centerX - columnWidth / 2) + "px";
+    button.style.top = (centerY - rowHeight / 2) + "px";
+
+    layers.mouseOverlay.appendChild(button);
+    return () => {
+        layers.mouseOverlay.removeChild(button);
+    }
+}
+
+function createScreenMoveControl(screenMoveControl: LayerScreenMoveControl,
+    layers: Layers,
+    ci: CommandInterface,
+    gridConfig: GridConfiguration,
+    dosInstance: DosInstance) {
+    const { cells, columnWidth, rowHeight } = gridConfig;
+    const { row, column } = screenMoveControl;
+    const { centerX, centerY } = cells[row][column];
+
+    let mX = 0.5;
+    let mY = 0.5;
+
+    if (screenMoveControl.direction.indexOf("up") >= 0) {
+        mY = 0;
+    }
+
+    if (screenMoveControl.direction.indexOf("down") >= 0) {
+        mY = 1;
+    }
+
+    if (screenMoveControl.direction.indexOf("left") >= 0) {
+        mX = 0;
+    }
+
+    if (screenMoveControl.direction.indexOf("right") >= 0) {
+        mX = 1;
+    }
+
+    const button = createButton(screenMoveControl.symbol, {
+        onDown: () => {
+            ci.sendMouseMotion(mX, mY);
+        },
+        onUp: () => {
+            ci.sendMouseMotion(0.5, 0.5);
+        },
     }, columnWidth);
 
     button.style.position = "absolute";
