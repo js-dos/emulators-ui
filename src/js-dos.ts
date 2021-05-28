@@ -129,9 +129,9 @@ export class DosInstance {
         this.unbindControls();
 
         if (config === null) {
-            this.unbindControls = initNullLayersControl(this.layers, ci, this.emulatorsUi);
+            this.unbindControls = initNullLayersControl(this.layers, ci);
         } else if (config.version === undefined) {
-            this.unbindControls = initLegacyLayersControl(this.layers, config as LegacyLayersConfig, ci, this.emulatorsUi);
+            this.unbindControls = initLegacyLayersControl(this.layers, config as LegacyLayersConfig, ci);
         } else {
             this.unbindControls = initLayersControl(this.layers, config as LayersConfig, ci, this, layerName);
         }

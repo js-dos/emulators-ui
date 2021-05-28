@@ -2,19 +2,9 @@ import { CommandInterface } from "emulators";
 import { Layers } from "../dom/layers";
 import { pointer, getPointerState } from "../dom/pointer";
 
-export enum MouseMode {
-    DEFAULT,
-    SCREEN_MOVER,
-}
-
-export interface MouseProps {
-    pointerButton: 0 | 1;
-    mode: MouseMode;
-}
 
 export function mouse(layers: Layers,
-                      ci: CommandInterface,
-                      props: MouseProps) {
+                      ci: CommandInterface) {
     const insensitivePadding = 1 / 100;
 
     function mapXY(eX: number, eY: number) {
@@ -89,18 +79,15 @@ export function mouse(layers: Layers,
         // not needed yet
     };
 
+    let pressedButton = 0;
     const onStart = (e: Event) => {
         if (e.target !== el) {
             return;
         }
 
         const state = getPointerState(e, el);
-
-        if (props.mode === MouseMode.SCREEN_MOVER) {
-            ci.sendMouseMotion(0.5, 0.5);
-        } else {
-            onMouseDown(state.x, state.y, state.button || props.pointerButton);
-        }
+        pressedButton = state.button || layers.pointerButton;
+        onMouseDown(state.x, state.y, pressedButton);
 
         e.stopPropagation();
         preventDefaultIfNeeded(e);
@@ -112,25 +99,14 @@ export function mouse(layers: Layers,
         }
 
         const state = getPointerState(e, el);
-        if (props.mode === MouseMode.SCREEN_MOVER) {
-            const { x, y } = mapXY(state.x, state.y);
-            const moveX = (x < 0.3 ? 0 : (x > 0.7 ? 1 : 0.5));
-            const moveY = (y < 0.3 ? 0 : (y > 0.7 ? 1 : 0.5));
-            ci.sendMouseMotion(moveX, moveY);
-        } else {
-            onMouseMove(state.x, state.y);
-        }
+        onMouseMove(state.x, state.y);
         e.stopPropagation();
         preventDefaultIfNeeded(e);
     };
 
     const onEnd = (e: Event) => {
         const state = getPointerState(e, el);
-        if (props.mode === MouseMode.SCREEN_MOVER) {
-            ci.sendMouseMotion(0.5, 0.5);
-        } else {
-            onMouseUp(state.x, state.y, state.button || props.pointerButton);
-        }
+        onMouseUp(state.x, state.y, pressedButton);
         e.stopPropagation();
         preventDefaultIfNeeded(e);
     };

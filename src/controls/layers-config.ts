@@ -4,7 +4,7 @@ import { Mapper } from "./keyboard";
 
 import { GridType } from "./grid";
 
-export type LayerControlType = "Options" | "Key" | "Keyboard" | "Switch";
+export type LayerControlType = "Options" | "Key" | "Keyboard" | "Switch" | "ScreenMove" | "PointerButton";
 
 export interface LayerPosition {
     column: number;
@@ -27,6 +27,10 @@ export interface LayerSwitchControl extends LayerControl {
 export interface LayerScreenMoveControl extends LayerControl {
     direction: "up" | "down" | "left" | "right" |
         "up-left" | "up-right" | "down-left" | "down-right";
+}
+
+export interface LayerPointerButtonControl extends LayerControl {
+    button: 0 | 1;
 }
 
 export interface LayerConfig {

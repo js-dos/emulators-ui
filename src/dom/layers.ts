@@ -25,6 +25,7 @@ export class Layers {
     width: number;
     height: number;
     fullscreen: boolean = false;
+    pointerButton: 0 | 1 = 0;
 
     notyf = new Notyf();
     toggleKeyboard: () => boolean = () => false;

@@ -1,12 +1,12 @@
-import { EmulatorsUi } from "./../emulators-ui";
-
-import { MouseMode, MouseProps } from "./mouse";
 import { Layers } from "../dom/layers";
 import { CommandInterface } from "emulators";
-import { LayersConfig, LayerConfig, LayerKeyControl, LayerControl, LayerSwitchControl, LayerScreenMoveControl } from "./layers-config";
+import { LayersConfig, LayerConfig, LayerKeyControl, LayerControl, LayerSwitchControl, LayerScreenMoveControl, LayerPointerButtonControl } from "./layers-config";
 import { getGrid, GridConfiguration } from "./grid";
 import { createButton } from "./button";
 import { DosInstance } from "../js-dos";
+import { keyboard } from "./keyboard";
+import { mouse } from "./mouse";
+import { options } from "./options";
 
 export function initLayersControl(
     layers: Layers,
@@ -38,20 +38,16 @@ const factoryMapping: { [type: string]: ControlFactory } = {
     Keyboard: createKeyboardControl,
     Switch: createSwitchControl,
     ScreenMove: createScreenMoveControl,
+    PointerButton: createPointerButtonControl,
 };
 
 function initLayerConfig(layerConfig: LayerConfig,
     layers: Layers,
     ci: CommandInterface,
     dosInstance: DosInstance) {
-    const mouseProps: MouseProps = {
-        pointerButton: 0,
-        mode: MouseMode.DEFAULT,
-    };
 
-    const emulatorsUi = dosInstance.emulatorsUi;
-    const unbindKeyboard = emulatorsUi.controls.keyboard(layers, ci);
-    const unbindMouse = emulatorsUi.controls.mouse(layers, ci, mouseProps);
+    const unbindKeyboard = keyboard(layers, ci);
+    const unbindMouse = mouse(layers, ci);
 
     const unbindControls: (() => void)[] = [];
     function onResize(width: number, height: number) {
@@ -117,13 +113,12 @@ function createOptionsControl(keyControl: LayerControl,
     const { cells, columnWidth, rowHeight } = gridConfig;
     const { row, column } = keyControl;
     const { centerX, centerY } = cells[row][column];
-    const emulatorsUi = dosInstance.emulatorsUi;
 
     const top = centerY - rowHeight / 2;
     const left = centerX - columnWidth / 2;
     const right = gridConfig.width - left - columnWidth;
 
-    return emulatorsUi.controls.options(layers, ["default"], () => {/**/},
+    return options(layers, ["default"], () => {/**/},
         columnWidth,
         top,
         right);
@@ -220,6 +215,34 @@ function createScreenMoveControl(screenMoveControl: LayerScreenMoveControl,
         onUp: () => {
             ci.sendMouseMotion(0.5, 0.5);
         },
+    }, columnWidth);
+
+    button.style.position = "absolute";
+    button.style.left = (centerX - columnWidth / 2) + "px";
+    button.style.top = (centerY - rowHeight / 2) + "px";
+
+    layers.mouseOverlay.appendChild(button);
+    return () => {
+        layers.mouseOverlay.removeChild(button);
+    }
+}
+
+function createPointerButtonControl(pointerButtonControl: LayerPointerButtonControl,
+    layers: Layers,
+    ci: CommandInterface,
+    gridConfig: GridConfiguration,
+    dosInstance: DosInstance) {
+    const { cells, columnWidth, rowHeight } = gridConfig;
+    const { row, column } = pointerButtonControl;
+    const { centerX, centerY } = cells[row][column];
+
+    const button = createButton(pointerButtonControl.symbol, {
+        onDown: () => {
+            layers.pointerButton = pointerButtonControl.button;
+        },
+        onUp: () => {
+            layers.pointerButton = 0;
+        }
     }, columnWidth);
 
     button.style.position = "absolute";

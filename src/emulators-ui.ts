@@ -6,7 +6,6 @@ import { video } from "./graphics/video";
 import { keyboard } from "./controls/keyboard";
 import { mouse } from "./controls/mouse";
 import { nipple } from "./controls/nipple";
-import { button } from "./controls/button";
 import { options } from "./controls/options";
 import { domToKeyCode, domToKeyCodes, keyCodesToDom, namedKeyCodes } from "./dom/keys";
 import { audioNode } from "./sound/audio-node";
@@ -49,7 +48,6 @@ export class EmulatorsUi {
         keyboard, // default keyboard processor
         mouse, // default mouse processor
         nipple, // multitouch control for emulating keyboard on mobiles
-        button, // button control
         options // default options control (fullscreen, save, etc.)
     };
 

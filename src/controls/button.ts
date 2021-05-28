@@ -3,13 +3,11 @@ import { Layers } from "../dom/layers";
 import { namedKeyCodes, KBD_NONE } from "../dom/keys";
 import { pointer } from "../dom/pointer";
 import { LayoutPosition } from "./layout";
-import { MouseProps, MouseMode } from "./mouse";
 
 export type ActionType = "click" | "hold";
 // hold - means track press/release events separately
 
-export type SpecialBinding = "mouseScreenMover" | "mouseRightButton";
-export type Binding = number | SpecialBinding;
+export type Binding = number;
 
 export interface Button {
     action: ActionType,
@@ -102,10 +100,9 @@ export function createButton(symbol: string,
     return button;
 }
 
-export function button(layers: Layers,
+export function deprecatedButton(layers: Layers,
                        ci: CommandInterface,
                        buttons: Button[],
-                       mouseProps: MouseProps,
                        size: number) {
     const ident = Math.round(size / 4);
     const toRemove: HTMLElement[] = [];
@@ -116,7 +113,7 @@ export function button(layers: Layers,
         }
 
         const symbol = (next.symbol || mapToSymbol(next.mapTo)).toUpperCase();
-        const handler = createHandler(next, layers, mouseProps);
+        const handler = deprecatedCreateHandler(next, layers);
         const button = createButton(symbol, handler, size);
 
         button.style.position = "absolute";
@@ -179,41 +176,15 @@ function mapToSymbol(mapTo: Binding): string {
     return mapTo;
 }
 
-function createHandler(button: Button,
-                       layers: Layers,
-                       mouse: MouseProps): ButtonHandler {
-    if (typeof button.mapTo === "number") {
+function deprecatedCreateHandler(button: Button,
+                       layers: Layers): ButtonHandler {
         const keyCode = button.mapTo;
         return button.action === "click" ?
-            { onClick: () => layers.fireKeyPress(keyCode) } :
+            { onClick: () => layers.fireKeyPress(button.mapTo) } :
             {
-                onDown: () => layers.fireKeyDown(keyCode),
-                onUp: () => layers.fireKeyUp(keyCode)
+                onDown: () => layers.fireKeyDown(button.mapTo),
+                onUp: () => layers.fireKeyUp(button.mapTo)
             };
-    }
-
-    return {
-        onDown: () => {
-            switch (button.mapTo) {
-                case "mouseScreenMover": {
-                    mouse.mode = MouseMode.SCREEN_MOVER;
-                } break;
-                case "mouseRightButton": {
-                    mouse.pointerButton = 1;
-                } break;
-            }
-        },
-        onUp: () => {
-            switch (button.mapTo) {
-                case "mouseScreenMover": {
-                    mouse.mode = MouseMode.DEFAULT;
-                } break;
-                case "mouseRightButton": {
-                    mouse.pointerButton = 0;
-                } break;
-            }
-        }
-    }
 }
 
 const down = "data:image/svg+xml,%3C%3Fxml version='1.0' encoding='utf-8'%3F%3E%3C!-- Generator: Adobe Illustrator 17.1.0, SVG Export Plug-In . SVG Version: 6.00 Build 0) --%3E%3C!DOCTYPE svg PUBLIC '-//W3C//DTD SVG 1.1//EN' 'http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd'%3E%3Csvg version='1.1' id='Layer_1' xmlns:sketch='http://www.bohemiancoding.com/sketch/ns' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' viewBox='0 0 20 20' fill='%23FFF' enable-background='new 0 0 20 20' xml:space='preserve'%3E%3Ctitle%3EShape%3C/title%3E%3Cdesc%3ECreated with Sketch.%3C/desc%3E%3Cg id='Page-1' sketch:type='MSPage'%3E%3Cg id='Artboard-1' transform='translate(-3.000000, -1.000000)' sketch:type='MSArtboardGroup'%3E%3Cpath id='Shape' sketch:type='MSShapeGroup' d='M19,12c-0.3,0-0.5,0.1-0.7,0.3L14,16.6V3c0-0.5-0.4-1-1-1s-1,0.5-1,1v13.6 l-4.3-4.3C7.5,12.1,7.3,12,7,12c-0.5,0-1,0.4-1,1c0,0.3,0.1,0.5,0.3,0.7l6,6c0.2,0.2,0.4,0.3,0.7,0.3s0.5-0.1,0.7-0.3l6-6 c0.2-0.2,0.3-0.4,0.3-0.7C20,12.4,19.5,12,19,12L19,12z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E";
