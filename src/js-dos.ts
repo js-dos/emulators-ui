@@ -9,6 +9,7 @@ import { extractLayersConfig, LegacyLayersConfig, LayersConfig } from "./control
 import { initLegacyLayersControl } from "./controls/legacy-layers-control";
 import { initNullLayersControl } from "./controls/null-layers-control";
 import { initLayersControl } from "./controls/layers-control";
+import { lifecycle } from "./dom/lifecycle";
 
 declare const emulators: Emulators;
 
@@ -69,6 +70,7 @@ export class DosInstance {
         } catch (e) {
             this.layers.setLoadingMessage("Unexpected error occured...");
             this.layers.notyf.error({ message: "Can't start emulator look browser logs for more info"});
+            // tslint:disable-next-line
             console.error(e);
             throw e;
         }
@@ -84,13 +86,15 @@ export class DosInstance {
                 }
                 emulatorsUi.graphics.webGl(this.layers, ci);
             } catch (e) {
+                // tslint:disable-next-line
                 console.error("Unable to create webgl canvas, fallback to 2d rendering");
                 emulatorsUi.graphics._2d(this.layers, ci);
             }
             emulatorsUi.sound.audioNode(ci);
         }
 
-        this.layers.setLoadingMessage("Waiting for config...");
+        emulatorsUi.dom.lifecycle(ci);
+
         const config = await ci.config();
         this.setLayersConfig(extractLayersConfig(config))
 

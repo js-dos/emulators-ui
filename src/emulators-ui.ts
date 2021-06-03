@@ -1,4 +1,5 @@
 import { layers } from "./dom/layers";
+import { lifecycle } from "./dom/lifecycle";
 import { resolveBundle } from "./network/xhr";
 import { _2d } from "./graphics/_2d";
 import { webGl } from "./graphics/webgl";
@@ -18,6 +19,7 @@ import { DosInstance, DosFactoryType, DosOptions } from "./js-dos";
 export class EmulatorsUi {
     dom = {
         layers, // DOM components that used by js-dos player
+        lifecycle, // compnent that manges liefcycle events
     };
 
     network = {
