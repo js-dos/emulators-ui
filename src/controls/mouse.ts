@@ -59,6 +59,8 @@ export function mouse(layers: Layers,
     };
 
     function onMouseUp(x: number, y: number, button: number) {
+        const xy = mapXY(x, y);
+        ci.sendMouseMotion(xy.x, xy.y);
         ci.sendMouseButton(button, false);
     };
 
