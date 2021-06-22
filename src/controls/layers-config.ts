@@ -31,6 +31,12 @@ export interface LayerScreenMoveControl extends LayerControl {
 
 export interface LayerPointerButtonControl extends LayerControl {
     button: 0 | 1;
+    click: boolean;
+}
+
+export interface LayerPointerMoveControl extends LayerControl {
+    x: number;
+    y: number;
 }
 
 export interface LayerConfig {

@@ -1,6 +1,6 @@
 import { Layers } from "../dom/layers";
 import { CommandInterface } from "emulators";
-import { LayersConfig, LayerConfig, LayerKeyControl, LayerControl, LayerSwitchControl, LayerScreenMoveControl, LayerPointerButtonControl } from "./layers-config";
+import { LayersConfig, LayerConfig, LayerKeyControl, LayerControl, LayerSwitchControl, LayerScreenMoveControl, LayerPointerButtonControl, LayerPointerMoveControl } from "./layers-config";
 import { getGrid, GridConfiguration } from "./grid";
 import { createButton } from "./button";
 import { DosInstance } from "../js-dos";
@@ -39,6 +39,7 @@ const factoryMapping: { [type: string]: ControlFactory } = {
     Switch: createSwitchControl,
     ScreenMove: createScreenMoveControl,
     PointerButton: createPointerButtonControl,
+    PointerMove: createPointerMoveControl,
 };
 
 function initLayerConfig(layerConfig: LayerConfig,
@@ -233,16 +234,52 @@ function createPointerButtonControl(pointerButtonControl: LayerPointerButtonCont
     gridConfig: GridConfiguration,
     dosInstance: DosInstance) {
     const { cells, columnWidth, rowHeight } = gridConfig;
-    const { row, column } = pointerButtonControl;
+    const { row, column, click } = pointerButtonControl;
     const { centerX, centerY } = cells[row][column];
 
     const button = createButton(pointerButtonControl.symbol, {
         onDown: () => {
-            layers.pointerButton = pointerButtonControl.button;
+            if (!click) {
+                layers.pointerButton = pointerButtonControl.button;
+            } else {
+                ci.sendMouseButton(pointerButtonControl.button, true);
+            }
         },
         onUp: () => {
-            layers.pointerButton = 0;
+            if (!click) {
+                layers.pointerButton = 0;
+            } else {
+                ci.sendMouseButton(pointerButtonControl.button, false);
+            }
         }
+    }, columnWidth);
+
+    button.style.position = "absolute";
+    button.style.left = (centerX - columnWidth / 2) + "px";
+    button.style.top = (centerY - rowHeight / 2) + "px";
+
+    layers.mouseOverlay.appendChild(button);
+    return () => {
+        layers.mouseOverlay.removeChild(button);
+    }
+}
+
+function createPointerMoveControl(pointerMoveControl: LayerPointerMoveControl,
+    layers: Layers,
+    ci: CommandInterface,
+    gridConfig: GridConfiguration,
+    dosInstance: DosInstance) {
+    const { cells, columnWidth, rowHeight } = gridConfig;
+    const { row, column, x, y } = pointerMoveControl;
+    const { centerX, centerY } = cells[row][column];
+
+    const button = createButton(pointerMoveControl.symbol, {
+        onDown: () => {
+            ci.sendMouseMotion(x, y);
+        },
+        onUp: () => {
+            ci.sendMouseMotion(x, y);
+        },
     }, columnWidth);
 
     button.style.position = "absolute";
