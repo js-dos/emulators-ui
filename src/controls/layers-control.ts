@@ -1,6 +1,11 @@
 import { Layers } from "../dom/layers";
 import { CommandInterface } from "emulators";
-import { LayersConfig, LayerConfig, LayerKeyControl, LayerControl, LayerSwitchControl, LayerScreenMoveControl, LayerPointerButtonControl, LayerPointerMoveControl, LayerNippleActivatorControl } from "./layers-config";
+import { 
+    LayersConfig, LayerConfig, LayerKeyControl, 
+    LayerControl, LayerSwitchControl, LayerScreenMoveControl, 
+    LayerPointerButtonControl, LayerPointerMoveControl, LayerPointerResetControl,
+    LayerNippleActivatorControl 
+} from "./layers-config";
 import { getGrid, GridConfiguration } from "./grid";
 import { createButton } from "./button";
 import { DosInstance } from "../js-dos";
@@ -36,7 +41,7 @@ type Sensor = {
 
 class ControlSensors {
 
-    sensors: {[key: string]: Sensor} = {};
+    sensors: { [key: string]: Sensor } = {};
 
     activate(row: number, column: number) {
         const sensor = this.sensors[column + "_" + row];
@@ -73,6 +78,7 @@ const factoryMapping: { [type: string]: ControlFactory } = {
     ScreenMove: createScreenMoveControl,
     PointerButton: createPointerButtonControl,
     PointerMove: createPointerMoveControl,
+    PointerReset: createPointerResetControl,
     NippleActivator: createNippleActivatorControl,
 };
 
@@ -367,6 +373,40 @@ function createPointerMoveControl(pointerMoveControl: LayerPointerMoveControl,
     }
 }
 
+function createPointerResetControl(pointerResetControl: LayerPointerResetControl,
+    layers: Layers,
+    ci: CommandInterface,
+    gridConfig: GridConfiguration,
+    sensors: ControlSensors,
+    // eslint-disable-next-line
+    dosInstance: DosInstance) {
+    const { cells, columnWidth } = gridConfig;
+    const { row, column } = pointerResetControl;
+    const { centerX, centerY } = cells[row][column];
+
+    const handler = {
+        onDown: () => {
+            ci.sendMouseSync();
+        },
+    }
+    const button = createButton(pointerResetControl.symbol, handler, columnWidth);
+
+    button.style.position = "absolute";
+    button.style.left = (centerX - button.widthPx / 2) + "px";
+    button.style.top = (centerY - button.heightPx / 2) + "px";
+
+    sensors.register(row, column, {
+        activate: handler.onDown,
+        // eslint-disable-next-line
+        deactivate: () => {},
+    });
+
+    layers.mouseOverlay.appendChild(button);
+    return () => {
+        layers.mouseOverlay.removeChild(button);
+    }
+}
+
 function createNippleActivatorControl(nippleActivatorControl: LayerNippleActivatorControl,
     layers: Layers,
     ci: CommandInterface,
@@ -392,16 +432,6 @@ function createNippleActivatorControl(nippleActivatorControl: LayerNippleActivat
     nippleContainer.style.top = top + "px";
     nippleContainer.style.right = right + "px";
     nippleContainer.style.bottom = bottom + "px";
-    nippleContainer.style.border = "3px solid red";
-
-    const marker = document.createElement("div");
-    marker.style.position = "absolute";
-    marker.style.border = "3px solid green";
-    marker.style.left = (width - right - left) / 2 + "px";
-    marker.style.top = (height - bottom - top) / 2 + "px";
-	marker.style.width = columnWidth + "px";
-    marker.style.height = rowHeight + "px";
-    nippleContainer.appendChild(marker);
 
     layers.mouseOverlay.appendChild(nippleContainer);
 
@@ -426,7 +456,7 @@ function createNippleActivatorControl(nippleActivatorControl: LayerNippleActivat
             return;
         }
         let targetColumn = -1;
-        let targetRow  = -1;
+        let targetRow = -1;
         const step = 360 / 8;
         const half = step / 2;
         const degree = data.angle.degree;
