@@ -32,15 +32,20 @@ export interface ButtonHandler {
     onClick?: () => void;
 }
 
+export interface HTMLJsDosButtonElement extends HTMLDivElement {
+    widthPx: number;
+    heightPx: number;
+}
+
 export function createButton(symbol: string,
                              handler: ButtonHandler,
-                             size: number) {
+                             size: number): HTMLJsDosButtonElement {
     const innerSize = Math.round(size * 0.6);
     const innerTextSize = Math.round(size * 0.5);
     const borderWidth = Math.max(1, Math.round(size / 20));
     const backgroundImage = symbolToUrl[symbol.toLowerCase()];
     const text = backgroundImage === undefined ? symbol : "";
-    const button = createDiv("emulator-button-touch-zone");
+    const button = createDiv("emulator-button-touch-zone") as HTMLJsDosButtonElement;
     const innerButton = createDiv("emulator-button");
     const innerText = createDiv("emulator-button-text",
                                 backgroundImage === undefined ? ((text === undefined || text.length === 0) ? "□" : text.substr(0, 1).toUpperCase()) : "");
@@ -52,8 +57,10 @@ export function createButton(symbol: string,
     innerButton.style.height = innerSize + "px";
     innerText.style.fontSize = innerTextSize + "px";
 
-    button.style.width = size - borderWidth * 2 + "px";
-    button.style.height = size - borderWidth * 2 + "px";
+    button.widthPx = size - borderWidth * 2;
+    button.heightPx = size - borderWidth * 2;
+    button.style.width = button.widthPx + "px";
+    button.style.height = button.heightPx + "px";
     button.style.borderWidth = borderWidth + "px";
     button.appendChild(innerButton);
     button.appendChild(innerText);
