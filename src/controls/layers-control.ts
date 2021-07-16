@@ -13,7 +13,7 @@ export function initLayersControl(
     layersConfig: LayersConfig,
     ci: CommandInterface,
     dosInstance: DosInstance,
-    layerName?: string) {
+    layerName?: string): () => void {
     let selectedLayer = layersConfig.layers[0];
     if (layerName !== undefined) {
         for (const next of layersConfig.layers) {
@@ -45,7 +45,7 @@ const factoryMapping: { [type: string]: ControlFactory } = {
 function initLayerConfig(layerConfig: LayerConfig,
     layers: Layers,
     ci: CommandInterface,
-    dosInstance: DosInstance) {
+    dosInstance: DosInstance): () => void {
 
     const unbindKeyboard = keyboard(layers, ci);
     const unbindMouse = mouse(layers, ci);
@@ -88,6 +88,7 @@ function createKeyControl(keyControl: LayerKeyControl,
     layers: Layers,
     ci: CommandInterface,
     gridConfig: GridConfiguration,
+    // eslint-disable-next-line
     dosInstance: DosInstance) {
     const { cells, columnWidth, rowHeight } = gridConfig;
     const { row, column } = keyControl;
@@ -110,6 +111,7 @@ function createOptionsControl(keyControl: LayerControl,
     layers: Layers,
     ci: CommandInterface,
     gridConfig: GridConfiguration,
+    // eslint-disable-next-line
     dosInstance: DosInstance) {
     const { cells, columnWidth, rowHeight } = gridConfig;
     const { row, column } = keyControl;
@@ -129,6 +131,7 @@ function createKeyboardControl(keyboardControl: LayerControl,
     layers: Layers,
     ci: CommandInterface,
     gridConfig: GridConfiguration,
+    // eslint-disable-next-line
     dosInstance: DosInstance) {
     const { cells, columnWidth, rowHeight } = gridConfig;
     const { row, column } = keyboardControl;
@@ -185,6 +188,7 @@ function createScreenMoveControl(screenMoveControl: LayerScreenMoveControl,
     layers: Layers,
     ci: CommandInterface,
     gridConfig: GridConfiguration,
+    // eslint-disable-next-line
     dosInstance: DosInstance) {
     const { cells, columnWidth, rowHeight } = gridConfig;
     const { row, column } = screenMoveControl;
@@ -232,6 +236,7 @@ function createPointerButtonControl(pointerButtonControl: LayerPointerButtonCont
     layers: Layers,
     ci: CommandInterface,
     gridConfig: GridConfiguration,
+    // eslint-disable-next-line
     dosInstance: DosInstance) {
     const { cells, columnWidth, rowHeight } = gridConfig;
     const { row, column, click } = pointerButtonControl;
@@ -268,6 +273,7 @@ function createPointerMoveControl(pointerMoveControl: LayerPointerMoveControl,
     layers: Layers,
     ci: CommandInterface,
     gridConfig: GridConfiguration,
+    // eslint-disable-next-line
     dosInstance: DosInstance) {
     const { cells, columnWidth, rowHeight } = gridConfig;
     const { row, column, x, y } = pointerMoveControl;

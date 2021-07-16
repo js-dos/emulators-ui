@@ -13,12 +13,12 @@ import buffer from "vinyl-buffer";
 import source from "vinyl-source-stream";
 
 import getRepoInfo from "git-repo-info";
-// tslint:disable-next-line:no-var-requires
+// eslint-disable-next-line
 const MD5 = require("md5.js");
-// tslint:disable-next-line:no-var-requires
+// eslint-disable-next-line
 const pjson = require("../package.json");
 
-// tslint:disable-next-line:no-var-requires
+// eslint-disable-next-line
 const tsify = require("tsify");
 
 function clean() {

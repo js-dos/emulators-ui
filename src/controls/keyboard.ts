@@ -26,8 +26,11 @@ export function keyboard(layers: Layers,
     });
 
     return () => {
+        // eslint-disable-next-line
         layers.setOnKeyDown((keyCode: number) => { /**/ });
+        // eslint-disable-next-line
         layers.setOnKeyUp((keyCode: number) => { /**/ });
+        // eslint-disable-next-line
         layers.setOnKeyPress((keyCode: number) => { /**/ });
     };
 }

@@ -178,7 +178,6 @@ function mapToSymbol(mapTo: Binding): string {
 
 function deprecatedCreateHandler(button: Button,
                        layers: Layers): ButtonHandler {
-        const keyCode = button.mapTo;
         return button.action === "click" ?
             { onClick: () => layers.fireKeyPress(button.mapTo) } :
             {

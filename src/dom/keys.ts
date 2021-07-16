@@ -1,5 +1,3 @@
-// tslint:disable:variable-name
-
 export const KBD_NONE = 0;
 export const KBD_0 = 48;
 export const KBD_1 = 49;

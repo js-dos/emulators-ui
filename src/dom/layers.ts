@@ -4,11 +4,12 @@ import { createDiv, stopPropagation } from "./helpers";
 
 import { domToKeyCode, KBD_enter, KBD_leftshift, KBD_backspace, KBD_capslock, KBD_tab, KBD_space, KBD_esc, KBD_leftctrl, KBD_leftalt } from "./keys";
 
-// tslint:disable-next-line:no-var-requires
+// eslint-disable-next-line
 const elementResizeDetector = require("element-resize-detector");
 const resizeDetector = elementResizeDetector({
 });
 
+// eslint-disable-next-line
 export interface LayersOptions {
 }
 
@@ -24,7 +25,7 @@ export class Layers {
     mouseOverlay: HTMLDivElement;
     width: number;
     height: number;
-    fullscreen: boolean = false;
+    fullscreen = false;
     pointerButton: 0 | 1 = 0;
 
     notyf = new Notyf();
@@ -43,6 +44,7 @@ export class Layers {
     private onFullscreenChanged: (fullscreen: boolean) => void = () => {/**/ };
     private onKeyboardChanged: ((visible: boolean) => void)[] = [];
 
+    // eslint-disable-next-line
     constructor(root: HTMLDivElement, options: LayersOptions) {
         this.root = root;
         this.root.classList.add("emulator-root");
@@ -166,7 +168,7 @@ export class Layers {
                 document.exitFullscreen();
             } else if ((document as any).webkitExitFullscreen) {
                 (document as any).webkitExitFullscreen();
-            } else if ((document as any).webkitExitFullscreen) {
+            } else if ((document as any).mozCancelFullScreen) {
                 (document as any).mozCancelFullScreen();
             } else if ((document as any).msExitFullscreen) {
                 (document as any).msExitFullscreen();

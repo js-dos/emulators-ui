@@ -28,7 +28,7 @@ export async function resolveBundle(url: string,
             const request = new XMLHttpRequest();
             request.open("GET", url, true);
             request.overrideMimeType("text/plain; charset=x-user-defined");
-            request.addEventListener("error", (evt) => {
+            request.addEventListener("error", () => {
                 reject(new Error("Network error, can't download " + url));
             });
             request.addEventListener("abort", () => {

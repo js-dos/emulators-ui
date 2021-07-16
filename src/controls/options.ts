@@ -1,4 +1,3 @@
-import { CommandInterface } from "emulators";
 import { Layers } from "../dom/layers";
 import { createButton } from "./button";
 import { createDiv, stopPropagation } from "../dom/helpers";

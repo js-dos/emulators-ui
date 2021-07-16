@@ -1,4 +1,4 @@
-// tslint:disable:no-console
+// eslint-disable-next-line
 
 import { blue, bold, red, yellow } from "colors";
 import * as process from "process";

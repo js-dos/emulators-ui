@@ -22,7 +22,7 @@
     "author": "Alexander Guryanov (aka caiiiycuk)",
     "license": "GPL-2.0",
     "bugs": {
-        "url": "https://github.com/js-dos/emulators-ui/issues"
+        "url": "https://github.com/caiiiycuk/js-dos/issues"
     },
     "homepage": "https://js-dos.com",
     "devDependencies": {
@@ -42,6 +42,8 @@
         "@types/node": "^10.17.21",
         "@types/vinyl-buffer": "^1.0.0",
         "@types/vinyl-source-stream": "0.0.30",
+        "@typescript-eslint/eslint-plugin": "^4.28.3",
+        "@typescript-eslint/parser": "^4.28.3",
         "babelify": "^10.0.0",
         "browserify": "^16.5.1",
         "chai": "^4.2.0",
@@ -51,6 +53,7 @@
         "docco": "^0.8.0",
         "element-resize-detector": "^1.2.1",
         "emulators": "^0.63.0",
+        "eslint": "^7.30.0",
         "fs-extra": "^9.0.0",
         "git-repo-info": "^2.1.1",
         "gulp": "^4.0.2",

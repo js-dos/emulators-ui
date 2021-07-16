@@ -9,7 +9,7 @@ export function createDiv(className: string, innerHtml?: string) {
     return el;
 }
 
-export function stopPropagation(el: HTMLElement, preventDefault: boolean = true) {
+export function stopPropagation(el: HTMLElement, preventDefault = true) {
     const onStop = (e: Event) => {
         e.stopPropagation();
     };

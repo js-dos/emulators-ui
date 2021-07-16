@@ -34,10 +34,15 @@ export interface LayerPointerButtonControl extends LayerControl {
     click: boolean;
 }
 
+// eslint-disable-next-line
+export interface LayerNippleActivatorControl extends LayerConfig {
+}
+
 export interface LayerPointerMoveControl extends LayerControl {
     x: number;
     y: number;
 }
+
 
 export interface LayerConfig {
     grid: GridType,
@@ -56,7 +61,7 @@ export interface LegacyLayerConfig {
     buttons: Button[],
     gestures: EventMapping[],
     mapper: Mapper,
-};
+}
 
 export type LegacyLayersConfig = {[index: string]: LegacyLayerConfig};
 

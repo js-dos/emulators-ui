@@ -93,10 +93,6 @@ export function audioNode(ci: CommandInterface) {
             return;
         }
 
-        if (samplesCount < numFrames) {
-            return;
-        }
-
         for (let channel = 0; channel < numChannels; channel++) {
             const channelData = event.outputBuffer.getChannelData(channel);
             samplesQueue.writeTo(channelData, numFrames);

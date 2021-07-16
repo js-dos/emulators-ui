@@ -1,7 +1,7 @@
-// tslint:disable-next-line
+// eslint-disable-next-line
 const nipplejs = require("nipplejs");
 
-import { KBD_left, KBD_right, KBD_up, KBD_down, KBD_f1, KBD_NONE } from "../dom/keys";
+import { KBD_NONE } from "../dom/keys";
 
 import { CommandInterface } from "emulators";
 import { Layers } from "../dom/layers";

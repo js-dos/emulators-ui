@@ -26,4 +26,4 @@ export function lifecycle(ci: CommandInterface) {
     ci.events().onExit(() => {
         document.removeEventListener(visibilityChange as any, visibilitHandler);
     });
-};
+}

@@ -56,18 +56,18 @@ export function mouse(layers: Layers,
         const xy = mapXY(x, y);
         ci.sendMouseMotion(xy.x, xy.y);
         ci.sendMouseButton(button, true);
-    };
+    }
 
     function onMouseUp(x: number, y: number, button: number) {
         const xy = mapXY(x, y);
         ci.sendMouseMotion(xy.x, xy.y);
         ci.sendMouseButton(button, false);
-    };
+    }
 
     function onMouseMove(x: number, y: number) {
         const xy = mapXY(x, y);
         ci.sendMouseMotion(xy.x, xy.y);
-    };
+    }
 
     function onMouseLeave(x: number, y: number) {
         const xy = mapXY(x, y);
@@ -77,9 +77,10 @@ export function mouse(layers: Layers,
     const el = layers.mouseOverlay;
 
 
+    // eslint-disable-next-line
     function preventDefaultIfNeeded(e: Event) {
         // not needed yet
-    };
+    }
 
     let pressedButton = 0;
     const onStart = (e: Event) => {

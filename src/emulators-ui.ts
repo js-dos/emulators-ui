@@ -61,7 +61,7 @@ export class EmulatorsUi {
     dos: DosFactoryType = (root: HTMLDivElement, options?: DosOptions) => {
         return new DosInstance(root, this, options || {});
     };
-};
+}
 
 const impl = new EmulatorsUi();
 (window as any).emulatorsUi = impl;
