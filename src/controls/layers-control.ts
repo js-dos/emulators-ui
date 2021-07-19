@@ -1,10 +1,10 @@
 import { Layers } from "../dom/layers";
 import { CommandInterface } from "emulators";
-import { 
-    LayersConfig, LayerConfig, LayerKeyControl, 
-    LayerControl, LayerSwitchControl, LayerScreenMoveControl, 
+import {
+    LayersConfig, LayerConfig, LayerKeyControl,
+    LayerControl, LayerSwitchControl, LayerScreenMoveControl,
     LayerPointerButtonControl, LayerPointerMoveControl, LayerPointerResetControl,
-    LayerNippleActivatorControl 
+    LayerNippleActivatorControl
 } from "./layers-config";
 import { getGrid, GridConfiguration } from "./grid";
 import { createButton } from "./button";
@@ -12,6 +12,7 @@ import { DosInstance } from "../js-dos";
 import { keyboard } from "./keyboard";
 import { mouse } from "./mouse";
 import { options } from "./options";
+import { pointer } from "../dom/pointer";
 
 // eslint-disable-next-line
 const nipplejs = require("nipplejs");
@@ -398,7 +399,7 @@ function createPointerResetControl(pointerResetControl: LayerPointerResetControl
     sensors.register(row, column, {
         activate: handler.onDown,
         // eslint-disable-next-line
-        deactivate: () => {},
+        deactivate: () => { },
     });
 
     layers.mouseOverlay.appendChild(button);
@@ -420,7 +421,7 @@ function createNippleActivatorControl(nippleActivatorControl: LayerNippleActivat
     const { centerX, centerY } = cells[row][column];
 
     const nippleContainer = document.createElement("div");
-    const cellSize = 2;
+    const cellSize = 1.5;
     const left = Math.max(0, centerX - columnWidth * cellSize);
     const top = Math.max(0, centerY - rowHeight * cellSize);
     const right = Math.max(0, width - centerX - columnWidth * cellSize);
@@ -438,7 +439,10 @@ function createNippleActivatorControl(nippleActivatorControl: LayerNippleActivat
     const manager = nipplejs.create({
         zone: nippleContainer,
         multitouch: false,
+        maxNumberOfNipples: 1,
         mode: "static",
+        follow: false,
+        dynamicPage: true,
         size: Math.max(columnWidth, rowHeight) * 1.5,
         position: {
             left: (width - right - left) / 2 + "px",
@@ -449,7 +453,7 @@ function createNippleActivatorControl(nippleActivatorControl: LayerNippleActivat
     let activeColumn = -1;
     let activeRow = -1;
     manager.on("move", (evt: any, data: any) => {
-        if (data.distance < 30) {
+        if (data.distance < 10) {
             sensors.deactivate(activeRow, activeColumn);
             activeColumn = -1;
             activeRow = -1;
@@ -501,15 +505,40 @@ function createNippleActivatorControl(nippleActivatorControl: LayerNippleActivat
             activeRow = targetRow;
         }
     });
+    
+    let started = false;
+    manager.on("start", () => {
+        started = true;
+    });
 
     manager.on("end", () => {
+        started = false;
         sensors.deactivate(activeRow, activeColumn);
         activeRow = -1;
         activeColumn = -1;
     });
 
+    const options = {
+        capture: true,
+    }
+
+    function onEnd(e: Event) {
+        if (started) {
+            started = false;
+            manager.processOnEnd(e);
+            e.stopPropagation();
+        }
+    }
+
+    for (const next of pointer.enders) {
+        layers.mouseOverlay.addEventListener(next, onEnd, options);
+    }
+
     return () => {
         manager.destroy();
         layers.mouseOverlay.removeChild(nippleContainer);
+        for (const next of pointer.enders) {
+            layers.mouseOverlay.removeEventListener(next, onEnd, options);
+        }
     }
 }
