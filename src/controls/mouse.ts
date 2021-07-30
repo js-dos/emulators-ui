@@ -4,7 +4,15 @@ import { pointer, getPointerState } from "../dom/pointer";
 
 
 export function mouse(layers: Layers,
-                      ci: CommandInterface) {
+    ci: CommandInterface) {
+
+    let autolock = false;
+    if (pointer.canLock) {
+        ci.config()
+            .then((config) => autolock = config.output.options.autolock.value)
+            .catch(console.error);
+    }
+
     const insensitivePadding = 1 / 100;
 
     function mapXY(eX: number, eY: number) {
@@ -51,22 +59,42 @@ export function mouse(layers: Layers,
         };
     }
 
+    function isNotLocked() {
+        return document.pointerLockElement !== el;
+    }
 
     function onMouseDown(x: number, y: number, button: number) {
-        const xy = mapXY(x, y);
-        ci.sendMouseMotion(xy.x, xy.y);
+        if (autolock && isNotLocked()) {
+            const requestPointerLock = el.requestPointerLock ||
+                (el as any).mozRequestPointerLock ||
+                (el as any).webkitRequestPointerLock;
+
+            requestPointerLock.call(el);
+        }
+
+        if (isNotLocked()) {
+            const xy = mapXY(x, y);
+            ci.sendMouseMotion(xy.x, xy.y);
+        }
+
         ci.sendMouseButton(button, true);
     }
 
     function onMouseUp(x: number, y: number, button: number) {
-        const xy = mapXY(x, y);
-        ci.sendMouseMotion(xy.x, xy.y);
+        if (isNotLocked()) {
+            const xy = mapXY(x, y);
+            ci.sendMouseMotion(xy.x, xy.y);
+        }
         ci.sendMouseButton(button, false);
     }
 
-    function onMouseMove(x: number, y: number) {
-        const xy = mapXY(x, y);
-        ci.sendMouseMotion(xy.x, xy.y);
+    function onMouseMove(x: number, y: number, mX: number, mY: number) {
+        if (isNotLocked()) {
+            const xy = mapXY(x, y);
+            ci.sendMouseMotion(xy.x, xy.y);
+        } else {
+            (ci as any).sendMouseRelativeMotion(mX, mY);
+        }
     }
 
     function onMouseLeave(x: number, y: number) {
@@ -102,7 +130,7 @@ export function mouse(layers: Layers,
         }
 
         const state = getPointerState(e, el);
-        onMouseMove(state.x, state.y);
+        onMouseMove(state.x, state.y, state.mX, state.mY);
         e.stopPropagation();
         preventDefaultIfNeeded(e);
     };

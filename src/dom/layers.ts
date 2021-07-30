@@ -43,7 +43,6 @@ export class Layers {
     private onSave: () => Promise<void>;
 
     private onFullscreenChanged: (fullscreen: boolean) => void = () => { /**/ };
-    private onPointerLockChanged: (lock: boolean) => void = () => { /**/}
     private onKeyboardChanged: ((visible: boolean) => void)[] = [];
 
     // eslint-disable-next-line
@@ -107,14 +106,6 @@ export class Layers {
                 this.onFullscreenChanged(this.fullscreen);
             }
         }
-
-        document.addEventListener("pointerlockchange", () => {
-            if (document.pointerLockElement !== this.root) {
-                this.pointerLock = false;
-                this.onPointerLockChanged(this.pointerLock);
-            }
-        }, false)
-
     }
 
     private initKeyEvents() {
@@ -206,29 +197,6 @@ export class Layers {
 
     setOnFullscreen(onFullscreenChanged: (fullscreen: boolean) => void) {
         this.onFullscreenChanged = onFullscreenChanged;
-    }
-
-    togglePointerLock() {
-        if (this.pointerLock) {
-            this.pointerLock = false;
-            const exitPointerLock = document.exitPointerLock ||
-                (document as any).mozExitPointerLock ||
-                (document as any).webkitExitPointerLock;
-
-            exitPointerLock();
-        } else {
-            this.pointerLock = true;
-
-            const requestPointerLock = this.root.requestPointerLock ||
-                (this.root as any).mozRequestPointerLock ||
-                (this.root as any).webkitRequestPointerLock;
-
-            requestPointerLock();
-        }
-    }
-
-    setOnPointerLock(onPointerLockChanged: (lock: boolean) => void) {
-        this.onPointerLockChanged = onPointerLockChanged;
     }
 
     setOnKeyboardVisibility(onKeyboardChanged: (visible: boolean) => void) {
