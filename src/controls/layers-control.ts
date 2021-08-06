@@ -156,7 +156,7 @@ function createKeyControl(keyControl: LayerKeyControl,
     return () => layers.mouseOverlay.removeChild(button);
 }
 
-function createOptionsControl(keyControl: LayerControl,
+function createOptionsControl(optionControl: LayerControl,
     layers: Layers,
     ci: CommandInterface,
     gridConfig: GridConfiguration,
@@ -164,8 +164,15 @@ function createOptionsControl(keyControl: LayerControl,
     sensors: ControlSensors,
     // eslint-disable-next-line
     dosInstance: DosInstance) {
+    
+    if (layers.options.optionControls !== undefined &&
+        layers.options.optionControls.length === 1 &&
+        layers.options.optionControls[0] === "keyboard") {
+        return createKeyboardControl(optionControl, layers, ci, gridConfig, sensors, dosInstance);
+    }
+
     const { cells, columnWidth, rowHeight } = gridConfig;
-    const { row, column } = keyControl;
+    const { row, column } = optionControl;
     const { centerX, centerY } = cells[row][column];
 
     const top = centerY - rowHeight / 2;

@@ -11,6 +11,7 @@ const resizeDetector = elementResizeDetector({
 
 // eslint-disable-next-line
 export interface LayersOptions {
+    optionControls?: string[];
 }
 
 export function layers(root: HTMLDivElement, options?: LayersOptions) {
@@ -18,6 +19,7 @@ export function layers(root: HTMLDivElement, options?: LayersOptions) {
 }
 
 export class Layers {
+    options: LayersOptions;
     root: HTMLDivElement;
     loading: HTMLDivElement;
     canvas: HTMLCanvasElement;
@@ -47,6 +49,7 @@ export class Layers {
 
     // eslint-disable-next-line
     constructor(root: HTMLDivElement, options: LayersOptions) {
+        this.options = options;
         this.root = root;
         this.root.classList.add("emulator-root");
 
