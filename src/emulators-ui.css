@@ -12,7 +12,7 @@
 
 .emulator-canvas, .emulator-video {
     image-rendering: -moz-crisp-edges;
-    image-rendering: -webkit-crisp-edges;
+    image-rendering: crisp-edges;
     image-rendering: pixelated;
     -webkit-touch-callout: none;
     -webkit-user-select: none;
