@@ -57,11 +57,15 @@ export class DosInstance {
         }
     }
 
-    async run(bundleUrl: string, optionalChangesUrl?: string): Promise<CommandInterface> {
+    async run(bundleUrl: string, 
+        optionalChangesUrl?: string,
+        optionalPersistKey?: string): Promise<CommandInterface> {
         await this.stop();
         this.layers.setLoadingMessage("Starting...");
 
-        const persistKey = bundleUrl + ".changes";
+        const persistKey = optionalPersistKey !== undefined && optionalPersistKey !== null && optionalPersistKey.length > 0 ?
+            optionalPersistKey :
+            bundleUrl + ".changes";
 
         let ci: CommandInterface;
         try {
