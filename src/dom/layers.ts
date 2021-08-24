@@ -2,7 +2,7 @@ import { Notyf } from "notyf";
 import Keyboard from "simple-keyboard";
 import { createDiv, stopPropagation } from "./helpers";
 
-import { domToKeyCode, KBD_enter, KBD_leftshift, KBD_backspace, KBD_capslock, KBD_tab, KBD_space, KBD_esc, KBD_leftctrl, KBD_leftalt } from "./keys";
+import { domToKeyCode, KBD_enter, KBD_leftshift, KBD_backspace, KBD_capslock, KBD_tab, KBD_space, KBD_esc, KBD_leftctrl, KBD_leftalt, KBD_comma, KBD_period, KBD_quote, KBD_semicolon, KBD_leftbracket, KBD_rightbracket } from "./keys";
 
 // eslint-disable-next-line
 const elementResizeDetector = require("element-resize-detector");
@@ -42,6 +42,7 @@ export class Layers {
     private onKeyDown: (keyCode: number) => void;
     private onKeyUp: (keyCode: number) => void;
     private onKeyPress: (keyCode: number) => void;
+    private onKeysPress: (keyCodes: number[]) => void;
 
     private onSave: () => Promise<void>;
 
@@ -85,6 +86,7 @@ export class Layers {
         this.onKeyDown = () => { /**/ };
         this.onKeyUp = () => { /**/ };
         this.onKeyPress = () => { /**/ };
+        this.onKeysPress = () => { /**/ };
         this.onSave = () => { return Promise.reject(new Error("Not implemented")); };
 
         resizeDetector.listenTo(this.root, (el: HTMLElement) => {
@@ -162,6 +164,15 @@ export class Layers {
 
     fireKeyPress(keyCode: number) {
         this.onKeyPress(keyCode);
+    }
+
+    setOnKeysPress(handler: (keyCodes: number[]) => void) {
+        this.onKeysPress = handler;
+    }
+
+
+    fireKeysPress(keyCodes: number[]) {
+        this.onKeysPress(keyCodes);
     }
 
     toggleFullscreen() {
@@ -250,24 +261,54 @@ export class Layers {
         let keyboardVisible = false;
 
         const layout = {
-            default: [
+            en: [
                 '{esc} ` 1 2 3 4 5 6 7 8 9 0 - = {bksp}',
-                'q w e r t y u i o p [ ] \\',
-                'a s d f g h j k l ; \' {enter}',
-                'z x c v b n m , . / {space}',
+                'q w e r t y u i o p { } \\',
+                'a s d f g h j k l ; \' [ {enter}',
+                '⎘ z x c v b n m , . / ] {space}',
             ],
         };
+        const enLayoutDisplay = {
+            '{esc}': 'ESC',
+            '{bksp}': 'Backspace',
+            '{enter}': '⏎',
+            '{space}': 'Space',
+        }; 
+        const ruLayoutDisplay = {
+            '{esc}': 'ESC',
+            '{bksp}': 'Backspace',
+            '{enter}': '⏎',
+            '{space}': 'Space',
+            'q': 'й', 'w': 'ц', 'e': 'у', 'r': 'к', 't': 'е', 'y': 'н', 'u': 'г', 'i': 'ш', 'o': 'щ', 'p': 'з', '{': 'х', '}': 'ъ',
+            'a': 'ф', 's': 'ы', 'd': 'в', 'f': 'а', 'g': 'п', 'h': 'р', 'j': 'о', 'k': 'л', 'l': 'д', ';': 'ж', '\'': 'э',
+            'z': 'я', 'x': 'ч', 'c': 'с', 'v': 'м', 'b': 'и', 'n': 'т', 'm': 'ь', ',': 'б', '.': 'ю', 
+        };
+        const displayOrder = [enLayoutDisplay, ruLayoutDisplay];
+        let displayIndex = 0;
 
         const keyboardDiv = createDiv("emulator-keyboard");
         keyboardDiv.style.display = "none";
         stopPropagation(keyboardDiv);
 
-        new Keyboard(keyboardDiv, {
+
+        const keyboard = new Keyboard(keyboardDiv, {
             layout,
+            layoutName: "en",
+            display: displayOrder[displayIndex],
             onKeyPress: button => {
-                const keyCode = buttonToCode(button);
-                if (keyCode !== 0) {
-                    this.fireKeyPress(keyCode);
+                if (button === "⎘") {
+                    displayIndex = (displayIndex + 1) % displayOrder.length;
+                    keyboard.setOptions({
+                        display: displayOrder[displayIndex],
+                    });
+                    return;
+                }
+
+                const keyCodes = buttonToCode(button);
+                if (keyCodes.length === 1) {
+                    this.fireKeyPress(keyCodes[0]);
+                } else if (keyCodes.length > 0) {
+                    this.fireKeysPress(keyCodes);
                 }
             },
             preventMouseDownDefault: true,
@@ -276,8 +317,7 @@ export class Layers {
             stopMouseUpPropagation: true,
             autoUseTouchEvents: true,
             useMouseEvents: true,
-        });
-
+        });        
 
         this.toggleKeyboard = () => {
             keyboardVisible = !keyboardVisible;
@@ -325,33 +365,48 @@ function createClickToStartLayer() {
 `);
 }
 
-function buttonToCode(button: string) {
-    let keyCode = 0;
+function buttonToCode(button: string): number[] {
     if (button.length > 1) {
         if (button === "{enter}") {
-            keyCode = KBD_enter;
+            return [KBD_enter];
         } else if (button === "{shift}") {
-            keyCode = KBD_leftshift;
+            return [KBD_leftshift];
         } else if (button === "{bksp}") {
-            keyCode = KBD_backspace;
+            return [KBD_backspace];
         } else if (button === "{lock}") {
-            keyCode = KBD_capslock;
+            return [KBD_capslock];
         } else if (button === "{tab}") {
-            keyCode = KBD_tab;
+            return [KBD_tab];
         } else if (button === "{space}") {
-            keyCode = KBD_space;
+            return [KBD_space];
         } else if (button === "{esc}") {
-            keyCode = KBD_esc;
+            return [KBD_esc];
         } else if (button === "ctrl") {
-            keyCode = KBD_leftctrl;
+            return [KBD_leftctrl];
         } else if (button === "{alt}") {
-            keyCode = KBD_leftalt;
+            return [KBD_leftalt];
         } else {
             console.warn("Unknown button", button);
+            return [];
         }
-    } else {
-        keyCode = domToKeyCode(button.toUpperCase().charCodeAt(0));
+    } else if (button === ",") {
+        return [KBD_comma];
+    } else if (button === ".") {
+        return [KBD_period];
+    } else if (button === "'") {
+        return [KBD_quote];
+    } else if (button === ":") {
+        return [KBD_semicolon];
+    } else if (button === "{") {
+        return [KBD_leftshift, KBD_leftbracket];
+    } else if (button === "}") {
+        return [KBD_leftshift, KBD_rightbracket];
     }
 
-    return keyCode;
+    const keyCode = domToKeyCode(button.toUpperCase().charCodeAt(0));
+    if (keyCode === 0) {
+        return [];
+    }
+
+    return [keyCode];
 }

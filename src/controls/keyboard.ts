@@ -24,6 +24,9 @@ export function keyboard(layers: Layers,
     layers.setOnKeyPress((keyCode: number) => {
         ci.simulateKeyPress(map(keyCode));
     });
+    layers.setOnKeysPress((keyCodes: number[]) => {
+        ci.simulateKeyPress(...keyCodes);
+    });
 
     return () => {
         // eslint-disable-next-line
@@ -32,5 +35,7 @@ export function keyboard(layers: Layers,
         layers.setOnKeyUp((keyCode: number) => { /**/ });
         // eslint-disable-next-line
         layers.setOnKeyPress((keyCode: number) => { /**/ });
+        // eslint-disable-next-line
+        layers.setOnKeysPress((keyCodes: number[]) => { /**/ });
     };
 }
