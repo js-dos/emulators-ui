@@ -9,7 +9,7 @@ export function mouse(layers: Layers,
     let autolock = false;
     if (pointer.canLock) {
         ci.config()
-            .then((config) => autolock = config.output.options.autolock.value)
+            .then((config) => autolock = config.output?.options?.autolock?.value === true)
             .catch(console.error);
     }
 
