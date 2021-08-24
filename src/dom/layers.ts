@@ -29,6 +29,7 @@ export class Layers {
     height: number;
     fullscreen = false;
     pointerLock = false;
+    pointerDisabled = false;
     pointerButton: 0 | 1 = 0;
 
     notyf = new Notyf();

@@ -42,6 +42,10 @@ export interface LayerNippleActivatorControl extends LayerControl {
 export interface LayerPointerResetControl extends LayerControl {
 }
 
+// eslint-disable-next-line
+export interface LayerPointerToggleControl extends LayerControl {
+}
+
 export interface LayerPointerMoveControl extends LayerControl {
     x: number;
     y: number;

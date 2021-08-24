@@ -4,7 +4,7 @@ import {
     LayersConfig, LayerConfig, LayerKeyControl,
     LayerControl, LayerSwitchControl, LayerScreenMoveControl,
     LayerPointerButtonControl, LayerPointerMoveControl, LayerPointerResetControl,
-    LayerNippleActivatorControl
+    LayerPointerToggleControl, LayerNippleActivatorControl
 } from "./layers-config";
 import { getGrid, GridConfiguration } from "./grid";
 import { createButton } from "./button";
@@ -80,6 +80,7 @@ const factoryMapping: { [type: string]: ControlFactory } = {
     PointerButton: createPointerButtonControl,
     PointerMove: createPointerMoveControl,
     PointerReset: createPointerResetControl,
+    PointerToggle: createPointerToggleControl,
     NippleActivator: createNippleActivatorControl,
 };
 
@@ -398,6 +399,47 @@ function createPointerResetControl(pointerResetControl: LayerPointerResetControl
         },
     }
     const button = createButton(pointerResetControl.symbol, handler, columnWidth);
+
+    button.style.position = "absolute";
+    button.style.left = (centerX - button.widthPx / 2) + "px";
+    button.style.top = (centerY - button.heightPx / 2) + "px";
+
+    sensors.register(row, column, {
+        activate: handler.onDown,
+        // eslint-disable-next-line
+        deactivate: () => { },
+    });
+
+    layers.mouseOverlay.appendChild(button);
+    return () => {
+        layers.mouseOverlay.removeChild(button);
+    }
+}
+
+function createPointerToggleControl(pointerToggleControl: LayerPointerToggleControl,
+    layers: Layers,
+    ci: CommandInterface,
+    gridConfig: GridConfiguration,
+    sensors: ControlSensors,
+    // eslint-disable-next-line
+    dosInstance: DosInstance) {
+    const { cells, columnWidth } = gridConfig;
+    const { row, column } = pointerToggleControl;
+    const { centerX, centerY } = cells[row][column];
+
+    const handler = {
+        onDown: () => {
+            layers.pointerDisabled = !layers.pointerDisabled
+            if (layers.pointerDisabled) {
+                if (!button.classList.contains("emulator-button-highlight")) {
+                    button.classList.add("emulator-button-highlight");
+                }
+            } else {
+                button.classList.remove("emulator-button-highlight");
+            }
+        },
+    }
+    const button = createButton(pointerToggleControl.symbol, handler, columnWidth);
 
     button.style.position = "absolute";
     button.style.left = (centerX - button.widthPx / 2) + "px";

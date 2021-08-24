@@ -116,6 +116,12 @@ export function mouse(layers: Layers,
             return;
         }
 
+        if (layers.pointerDisabled) {
+            e.stopPropagation();
+            preventDefaultIfNeeded(e);
+            return;
+        }
+
         const state = getPointerState(e, el);
         pressedButton = state.button || layers.pointerButton;
         onMouseDown(state.x, state.y, pressedButton);
@@ -129,6 +135,12 @@ export function mouse(layers: Layers,
             return;
         }
 
+        if (layers.pointerDisabled) {
+            e.stopPropagation();
+            preventDefaultIfNeeded(e);
+            return;
+        }
+
         const state = getPointerState(e, el);
         onMouseMove(state.x, state.y, state.mX, state.mY);
         e.stopPropagation();
@@ -136,6 +148,12 @@ export function mouse(layers: Layers,
     };
 
     const onEnd = (e: Event) => {
+        if (layers.pointerDisabled) {
+            e.stopPropagation();
+            preventDefaultIfNeeded(e);
+            return;
+        }
+
         const state = getPointerState(e, el);
         onMouseUp(state.x, state.y, pressedButton);
         e.stopPropagation();
@@ -144,6 +162,12 @@ export function mouse(layers: Layers,
 
     const onLeave = (e: Event) => {
         if (e.target !== el) {
+            return;
+        }
+
+        if (layers.pointerDisabled) {
+            e.stopPropagation();
+            preventDefaultIfNeeded(e);
             return;
         }
 
