@@ -167,9 +167,7 @@ export class DosInstance {
             try {
                 let changesBundle: Uint8Array | undefined;
                 if (optionalChangesUrl !== undefined && optionalChangesUrl !== null && optionalChangesUrl.length > 0) {
-                    changesBundle = await emulatorsUi.network.resolveBundle(optionalChangesUrl + "?dt=" + Date.now(), {
-                        httpCache: false,
-                    });
+                    changesBundle = await emulatorsUi.network.resolveBundle(optionalChangesUrl, { httpCache: false });
                 } else {
                     changesBundle = await emulatorsUi.persist.load(persistKey, emulators);
                 }
