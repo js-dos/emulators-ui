@@ -36,15 +36,24 @@ function getSquareGrid(): Grid {
         getConfiguration(width: number, height: number): GridConfiguration {
             const cols = this.getCols();
             const rows = this.getRows();
+            const middleCol = Math.floor(cols / 2);
+            const middleRow = Math.floor(rows / 2);
             const columnsPadding = width * 5 / 100 / 2;
             const rowsPadding = columnsPadding;
             const columnWidth = (width - columnsPadding * 2) / cols;
             const rowHeight = (height - rowsPadding * 2) / rows;
-            const cells: Cell[][] = []; for (let row = 0; row < rows; ++row) {const cellRow: Cell[] = [];
+            const size = Math.min(columnWidth, rowHeight);
+            const cells: Cell[][] = []; 
+            for (let row = 0; row < rows; ++row) {
+                const cellRow: Cell[] = [];
                 for (let col = 0; col < cols; ++col) {
                     cellRow.push({
-                        centerX: columnsPadding + columnWidth * (col + 1 / 2),
-                        centerY: rowsPadding + rowHeight * (row + 1 / 2),
+                        centerX:  col < middleCol ?
+                            columnsPadding + size * (col + 1 / 2) :
+                            width - columnsPadding - size * ((cols - col - 1) + 1 / 2),
+                        centerY: row < middleRow ? 
+                            rowsPadding + size * (row + 1 / 2) :
+                            height - rowsPadding - size * ((rows - row - 1) + 1 / 2),
                     });
                 }
                 cells.push(cellRow);
@@ -52,8 +61,8 @@ function getSquareGrid(): Grid {
             return {
                 gridType: "square",
                 cells,
-                columnWidth,
-                rowHeight,
+                columnWidth: size,
+                rowHeight: size,
                 columnsPadding,
                 rowsPadding,
                 width,
@@ -80,28 +89,35 @@ function getHoneyCombGrid(): Grid {
         getConfiguration(width: number, height: number): GridConfiguration {
             const cols = this.getCols();
             const rows = this.getRows();
+            const middleCol = Math.floor(cols / 2);
+            const middleRow = Math.floor(rows / 2);
             const columnsPadding = width * 5 / 100 / 2;
             const rowsPadding = columnsPadding;
             const columnWidth = (width - columnsPadding * 2) / cols;
             const rowHeight = (height - rowsPadding * 2) / rows;
+            const size = Math.min(columnWidth, rowHeight);
             const cells: Cell[][] = [];
             for (let row = 0; row < rows; ++row) {
                 const cellRow: Cell[] = [];
                 const cellCols = row % 2 == 0 ? cols : cols - 1;
-                const padding = row % 2 == 0 ? 0 : columnWidth / 2;
+                const padding = row % 2 == 0 ? 0 : size / 2;
                 for (let col = 0; col < cellCols; ++col) {
                     cellRow.push({
-                        centerX: padding + columnsPadding + columnWidth * (col + 1 / 2),
-                        centerY: rowsPadding + rowHeight * (row + 1 / 2),
+                        centerX: col < middleCol ?
+                            padding + columnsPadding + size * (col + 1 / 2):
+                            padding + width - columnsPadding - size * ((cols - col - 1) + 1/2),
+                        centerY: row < middleRow ? 
+                            rowsPadding + size * (row + 1 / 2) :
+                            height - rowsPadding - size * ((rows - row - 1) + 1 / 2),
                     });
                 }
                 cells.push(cellRow);
             }
             return {
-                gridType: "square",
+                gridType: "honeycomb",
                 cells,
-                columnWidth,
-                rowHeight,
+                columnWidth: size,
+                rowHeight: size,
                 columnsPadding,
                 rowsPadding,
                 width,
