@@ -172,7 +172,7 @@ export class DosInstance {
         this.onMobileControlsChanged(false);
     }
 
-    public setOnMobileControlChanged(handler: (visible: boolean) => void) {
+    public setOnMobileControlsChanged(handler: (visible: boolean) => void) {
         this.onMobileControlsChanged = handler;
     }
 
