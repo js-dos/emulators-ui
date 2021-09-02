@@ -10,7 +10,7 @@ import { initLegacyLayersControl } from "./controls/legacy-layers-control";
 import { initNullLayersControl } from "./controls/null-layers-control";
 import { initLayersControl } from "./controls/layers-control";
 
-import { pointer, pointers } from "./dom/pointer";
+import { pointers } from "./dom/pointer";
 
 declare const emulators: Emulators;
 

@@ -13,8 +13,6 @@ export function options(layers: Layers,
     let controlsVisbile = false;
     let keyboardVisible = false;
 
-
-
     const updateVisibility = () => {
         const display = controlsVisbile ? "flex" : "none";
         for (const next of children) {

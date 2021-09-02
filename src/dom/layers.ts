@@ -12,6 +12,8 @@ const resizeDetector = elementResizeDetector({
 // eslint-disable-next-line
 export interface LayersOptions {
     optionControls?: string[];
+    keyboardDiv?: HTMLDivElement;
+    fullscreenElement?: HTMLElement;
 }
 
 export function layers(root: HTMLDivElement, options?: LayersOptions) {
@@ -35,6 +37,7 @@ export class Layers {
     notyf = new Notyf();
     toggleKeyboard: () => boolean = () => false;
 
+    private fullscreenElement: HTMLElement;
     private clickToStart: HTMLDivElement;
     private loaderText: HTMLPreElement;
     private onResize: ((width: number, height: number) => void)[];
@@ -48,7 +51,7 @@ export class Layers {
     private onSaveStarted: () => void;
     private onSaveEnded: () => void;
 
-    private onFullscreenChanged: (fullscreen: boolean) => void = () => { /**/ };
+    private onFullscreenChanged: ((fullscreen: boolean) => void)[] = [];
     private onKeyboardChanged: ((visible: boolean) => void)[] = [];
 
     // eslint-disable-next-line
@@ -56,6 +59,7 @@ export class Layers {
         this.options = options;
         this.root = root;
         this.root.classList.add("emulator-root");
+        this.fullscreenElement = options.fullscreenElement || this.root;
 
         this.canvas = document.createElement("canvas");
         this.canvas.className = "emulator-canvas";
@@ -110,10 +114,12 @@ export class Layers {
         this.preventContextMenu();
 
 
-        this.root.onfullscreenchange = () => {
-            if (document.fullscreenElement !== this.root) {
+        this.fullscreenElement.onfullscreenchange = () => {
+            if (document.fullscreenElement !== this.fullscreenElement) {
                 this.fullscreen = false;
-                this.onFullscreenChanged(this.fullscreen);
+                for (const next of this.onFullscreenChanged) {
+                   next(this.fullscreen);
+                }
             }
         }
     }
@@ -182,8 +188,8 @@ export class Layers {
     toggleFullscreen() {
         if (this.fullscreen) {
             this.fullscreen = false;
-            if (this.root.classList.contains("emulator-fullscreen-workaround")) {
-                this.root.classList.remove("emulator-fullscreen-workaround");
+            if (this.fullscreenElement.classList.contains("emulator-fullscreen-workaround")) {
+                this.fullscreenElement.classList.remove("emulator-fullscreen-workaround");
             } else if (document.exitFullscreen) {
                 document.exitFullscreen();
             } else if ((document as any).webkitExitFullscreen) {
@@ -193,10 +199,12 @@ export class Layers {
             } else if ((document as any).msExitFullscreen) {
                 (document as any).msExitFullscreen();
             }
-            this.onFullscreenChanged(false);
+            for (const next of this.onFullscreenChanged) {
+                next(false);
+            }
         } else {
             this.fullscreen = true;
-            const element = this.root as any;
+            const element = this.fullscreenElement as any;
             if (element.requestFullscreen) {
                 element.requestFullscreen();
             } else if (element.webkitRequestFullscreen) {
@@ -208,14 +216,20 @@ export class Layers {
             } else if (element.webkitEnterFullscreen) {
                 element.webkitEnterFullscreen();
             } else {
-                this.root.classList.add("emulator-fullscreen-workaround");
+                this.fullscreenElement.classList.add("emulator-fullscreen-workaround");
             }
-            this.onFullscreenChanged(true);
+            for (const next of this.onFullscreenChanged) {
+                next(true);
+            }
         }
     }
 
     setOnFullscreen(onFullscreenChanged: (fullscreen: boolean) => void) {
-        this.onFullscreenChanged = onFullscreenChanged;
+        this.onFullscreenChanged.push(onFullscreenChanged);
+    }
+
+    removeOnFullscreen(onFullscreenChanged: (visible: boolean) => void) {
+        this.onFullscreenChanged = this.onFullscreenChanged.filter((n) => n !== onFullscreenChanged);
     }
 
     setOnKeyboardVisibility(onKeyboardChanged: (visible: boolean) => void) {
@@ -301,7 +315,8 @@ export class Layers {
         const displayOrder = [enLayoutDisplay, ruLayoutDisplay];
         let displayIndex = 0;
 
-        const keyboardDiv = createDiv("emulator-keyboard");
+        const keyboardDiv = this.options.keyboardDiv || createDiv("");
+        keyboardDiv.classList.add("emulator-keyboard");
         keyboardDiv.style.display = "none";
         stopPropagation(keyboardDiv);
 
@@ -346,7 +361,9 @@ export class Layers {
             return keyboardVisible;
         };
 
-        this.mouseOverlay.appendChild(keyboardDiv);
+        if (!this.options.keyboardDiv) {
+            this.mouseOverlay.appendChild(keyboardDiv);
+        }
     }
 }
 
