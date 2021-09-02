@@ -82,6 +82,7 @@ export function options(layers: Layers,
         }
     };
     layers.setOnKeyboardVisibility(onKeyboardVisibility);
+    onKeyboardVisibility(layers.keyboardVisible);
 
     layers.setOnFullscreen((fullscreenEnabled) => {
         if (fullscreenEnabled) {
@@ -98,6 +99,7 @@ export function options(layers: Layers,
     }
 
     const container = createDiv("emulator-options");
+    const intialDisplay = keyboardVisible ? "flex" : "none";
     for (const next of children) {
         if (next !== options) {
             next.classList.add("emulator-button-control");
@@ -105,7 +107,7 @@ export function options(layers: Layers,
         next.style.marginRight = ident + "px";
         next.style.marginBottom = ident + "px";
         if (next !== options) {
-            next.style.display = "none";
+            next.style.display = intialDisplay;
         }
         container.appendChild(next);
     }

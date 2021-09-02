@@ -30,6 +30,7 @@ export class Layers {
     width: number;
     height: number;
     fullscreen = false;
+    keyboardVisible = false;
     pointerLock = false;
     pointerDisabled = false;
     pointerButton: 0 | 1 = 0;
@@ -358,6 +359,7 @@ export class Layers {
                 next(keyboardVisible);
             }
 
+            this.keyboardVisible = keyboardVisible;
             return keyboardVisible;
         };
 
