@@ -1,7 +1,7 @@
 export const pointer = initBind();
+export const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
 function initBind() {
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     const isTouch = isMobile && !!('ontouchstart' in window);
     const isPointer = isMobile && (window.PointerEvent ? true : false);
     const isMSPointer = isMobile && (window.MSPointerEvent ? true : false);
@@ -83,6 +83,7 @@ export function getPointerState(e: Event, el: HTMLElement): PointerState {
 }
 
 export const pointers = {
+    isMobile,
     bind: pointer,
     getPointerState,
 };

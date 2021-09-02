@@ -10,6 +10,8 @@ import { initLegacyLayersControl } from "./controls/legacy-layers-control";
 import { initNullLayersControl } from "./controls/null-layers-control";
 import { initLayersControl } from "./controls/layers-control";
 
+import { isMobile } from "./dom/pointer";
+
 declare const emulators: Emulators;
 
 export type EmulatorFunction = "dosboxWorker" | "dosboxDirect" | "dosboxNode" | "janus" | "backend";
@@ -33,10 +35,12 @@ export class DosInstance {
     ciPromise?: Promise<CommandInterface>;
 
     options: DosOptions;
+    mobileControls: boolean;
 
     private clickToStart: boolean;
     private unbindControls: () => void = () => {/**/};
     private storedLayersConfig: LayersConfig | LegacyLayersConfig | null = null;
+    private onMobileControlsChanged: (visible: boolean) => void;
 
     constructor(root: HTMLDivElement, emulatorsUi: EmulatorsUi, options: DosOptions) {
         if (DosInstance.initialRun) {
@@ -51,6 +55,8 @@ export class DosInstance {
         this.layers = this.emulatorsUi.dom.layers(root, options.layersOptions);
         this.layers.showLoadingLayer();
         this.createTransportLayer = options.createTransportLayer;
+        this.mobileControls = isMobile;
+        this.onMobileControlsChanged = () => { /**/ };
 
         if (this.emulatorFunction === "backend" && this.createTransportLayer === undefined) {
             throw new Error("Emulator function set to 'backend' but 'createTransportLayer' is not a function");
@@ -101,6 +107,10 @@ export class DosInstance {
         const config = await ci.config();
         this.setLayersConfig(extractLayersConfig(config))
 
+        if (!this.mobileControls) {
+            this.disableMobileControls();
+        }
+
         this.layers.setLoadingMessage("Ready");
         this.layers.hideLoadingLayer();
 
@@ -149,13 +159,21 @@ export class DosInstance {
     }
 
     public enableMobileControls() {
+        this.mobileControls = true;
         this.setLayersConfig(this.storedLayersConfig);
         this.storedLayersConfig = null;
+        this.onMobileControlsChanged(true);
     }
 
     public disableMobileControls() {
+        this.mobileControls = false;
         this.storedLayersConfig = this.layersConfig;
         this.setLayersConfig(null);
+        this.onMobileControlsChanged(false);
+    }
+
+    public setOnMobileControlChanged(handler: (visible: boolean) => void) {
+        this.onMobileControlsChanged = handler;
     }
 
     private async runBundle(bundleUrl: string, optionalChangesUrl: string | undefined, persistKey: string) {
