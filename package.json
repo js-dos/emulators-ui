@@ -1,6 +1,6 @@
 {
     "name": "emulators-ui",
-    "version": "0.69.0",
+    "version": "0.70.0",
     "description": "Emulators UI",
     "main": "dist/emulators-ui.js",
     "types": "dist/types/emulators-ui.d.ts",

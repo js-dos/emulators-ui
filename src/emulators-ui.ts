@@ -13,6 +13,7 @@ import { audioNode } from "./sound/audio-node";
 import { notyf } from "./notification/notyf";
 import { save, load } from "./persist/save-load";
 import { getGrid } from "./controls/grid";
+import { pointers } from "./dom/pointer";
 
 import { DosInstance, DosFactoryType, DosOptions } from "./js-dos";
 
@@ -20,6 +21,7 @@ export class EmulatorsUi {
     dom = {
         layers, // DOM components that used by js-dos player
         lifecycle, // compnent that manges liefcycle events
+        pointers, // abstraction over mouse, touch, pointer API
     };
 
     network = {

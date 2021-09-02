@@ -81,3 +81,8 @@ export function getPointerState(e: Event, el: HTMLElement): PointerState {
         }
     }
 }
+
+export const pointers = {
+    bind: pointer,
+    getPointerState,
+};
