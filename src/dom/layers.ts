@@ -45,6 +45,8 @@ export class Layers {
     private onKeysPress: (keyCodes: number[]) => void;
 
     private onSave: () => Promise<void>;
+    private onSaveStarted: () => void;
+    private onSaveEnded: () => void;
 
     private onFullscreenChanged: (fullscreen: boolean) => void = () => { /**/ };
     private onKeyboardChanged: ((visible: boolean) => void)[] = [];
@@ -88,6 +90,8 @@ export class Layers {
         this.onKeyPress = () => { /**/ };
         this.onKeysPress = () => { /**/ };
         this.onSave = () => { return Promise.reject(new Error("Not implemented")); };
+        this.onSaveStarted = () => { /**/ };
+        this.onSaveEnded = () => { /**/ };
 
         resizeDetector.listenTo(this.root, (el: HTMLElement) => {
             if (el !== root) {
@@ -223,17 +227,28 @@ export class Layers {
     }
 
     save(): Promise<void> {
+        this.onSaveStarted();
         return this.onSave()
             .then(() => {
                 this.notyf.success("Saved");
+                this.onSaveEnded();
             })
             .catch((error) => {
                 this.notyf.error(error.message);
+                this.onSaveEnded();
             });
     }
 
     setOnSave(handler: () => Promise<void>) {
         this.onSave = handler;
+    }
+
+    setOnSaveStarted(callback: () => void) {
+        this.onSaveStarted = callback;
+    }
+    
+    setOnSaveEnded(callback: () => void) {
+        this.onSaveEnded = callback;
     }
 
     hideLoadingLayer() {
