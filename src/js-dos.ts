@@ -105,7 +105,7 @@ export class DosInstance {
         emulatorsUi.dom.lifecycle(ci);
 
         const config = await ci.config();
-        this.setLayersConfig(extractLayersConfig(config))
+        await this.setLayersConfig(extractLayersConfig(config))
 
         if (!this.mobileControls) {
             this.disableMobileControls();
