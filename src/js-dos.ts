@@ -10,7 +10,7 @@ import { initLegacyLayersControl } from "./controls/legacy-layers-control";
 import { initNullLayersControl } from "./controls/null-layers-control";
 import { initLayersControl } from "./controls/layers-control";
 
-import { isMobile } from "./dom/pointer";
+import { pointer, pointers } from "./dom/pointer";
 
 declare const emulators: Emulators;
 
@@ -55,7 +55,7 @@ export class DosInstance {
         this.layers = this.emulatorsUi.dom.layers(root, options.layersOptions);
         this.layers.showLoadingLayer();
         this.createTransportLayer = options.createTransportLayer;
-        this.mobileControls = isMobile;
+        this.mobileControls = pointers.bind.mobile;
         this.onMobileControlsChanged = () => { /**/ };
 
         if (this.emulatorFunction === "backend" && this.createTransportLayer === undefined) {
