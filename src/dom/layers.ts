@@ -258,6 +258,10 @@ export class Layers {
         this.onSave = handler;
     }
 
+    getOnSave() {
+        return this.onSave;
+    }
+
     setOnSaveStarted(callback: () => void) {
         this.onSaveStarted = callback;
     }
