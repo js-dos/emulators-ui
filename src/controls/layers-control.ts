@@ -166,7 +166,7 @@ function createOptionsControl(optionControl: LayerControl,
     // eslint-disable-next-line
     dosInstance: DosInstance) {
 
-    if (layers.options.optionControls === []) {
+    if (layers.options.optionControls?.length === 0) {
         return () => {/**/};
     }
     
