@@ -165,6 +165,10 @@ function createOptionsControl(optionControl: LayerControl,
     sensors: ControlSensors,
     // eslint-disable-next-line
     dosInstance: DosInstance) {
+
+    if (layers.options.optionControls === []) {
+        return () => {/**/};
+    }
     
     if (layers.options.optionControls !== undefined &&
         layers.options.optionControls.length === 1 &&

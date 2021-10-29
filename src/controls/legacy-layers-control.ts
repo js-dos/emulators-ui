@@ -50,7 +50,11 @@ export function initLegacyLayersControl(
     }
 
 
-    const unbindOptions = options(layers, layersNames, changeControlLayer, 54, 54 / 4, 0);
+    const unbindOptions =
+        (layers.options.optionControls === []) ?
+            () => {/**/} :
+            options(layers, layersNames, changeControlLayer, 54, 54 / 4, 0);
+
     changeControlLayer("default");
 
     return () => {
