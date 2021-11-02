@@ -36,9 +36,16 @@ export function initLayersControl(
     return initLayerConfig(selectedLayer, layers, ci, dosInstance, mirrored);
 }
 
-type Sensor = {
+interface Sensor {
     activate: () => void;
     deactivate: () => void;
+}
+
+interface MirroredInfo {
+    leftStart: number;
+    leftEnd: number;
+    rightStart: number;
+    rightEnd: number;
 }
 
 class ControlSensors {
@@ -108,9 +115,41 @@ function initLayerConfig(layerConfig: LayerConfig,
         let doOffsetColumnInRow = -1;
         if (layers.options.optionControls?.length === 0) {
             for (const next of layerConfig.controls) {
-                if (next.type === "Options") {
-                    doOffsetColumnInRow = next.row;
+                const { row, type } = next;
+                if (type === "Options") {
+                    doOffsetColumnInRow = row;
                     break;
+                }
+            }
+        }
+
+        const mirroredInfo: { [row: number]: MirroredInfo } = {};
+        if (mirrored) {
+            for (const next of layerConfig.controls) {
+                const { row } = next;
+                let column = next.column;
+                const columnsCount = gridConfig.cells[row].length;
+                const middleColumn = columnsCount / 2;
+
+                if (row === doOffsetColumnInRow && column >= middleColumn) {
+                    column = Math.min(column + 1, columnsCount - 1);
+                }
+
+                if (mirroredInfo[row] === undefined) {
+                    mirroredInfo[row] = {
+                        leftStart: middleColumn,
+                        leftEnd: 0,
+                        rightStart: columnsCount - 1,
+                        rightEnd: middleColumn,
+                    };
+                }
+
+                if (column < middleColumn) {
+                    mirroredInfo[row].leftStart = Math.min(mirroredInfo[row].leftStart, column);
+                    mirroredInfo[row].leftEnd = Math.max(mirroredInfo[row].leftEnd, column);
+                } else {
+                    mirroredInfo[row].rightStart = Math.min(mirroredInfo[row].rightStart, column);
+                    mirroredInfo[row].rightEnd = Math.max(mirroredInfo[row].rightEnd, column);
                 }
             }
         }
@@ -123,15 +162,28 @@ function initLayerConfig(layerConfig: LayerConfig,
             }
 
             const copy = { ...next };
-            const columnCount = gridConfig.cells[next.row].length;
-            if (doOffsetColumnInRow === next.row &&
-                next.column >= columnCount / 2 &&
-                next.type !== "Options") {
-                copy.column++;
+            const columnsCount = gridConfig.cells[next.row].length;
+            const middleColumn = columnsCount / 2;
+            if (doOffsetColumnInRow === next.row && next.column >= middleColumn) {
+                copy.column = Math.min(copy.column + 1, columnsCount - 1);
             }
 
             if (mirrored) {
-                copy.column = (columnCount - 1) - copy.column;
+                const { leftStart, leftEnd, rightStart, rightEnd } = mirroredInfo[copy.row];
+                const leftSide = copy.column < middleColumn;
+                if (leftSide) {
+                    copy.column += middleColumn + (middleColumn - leftEnd) - leftStart - 1;
+                } else {
+                    copy.column -= middleColumn + (rightStart - middleColumn) - (columnsCount - rightEnd) + 1;
+                }
+
+                if (copy.column >= columnsCount) {
+                    console.error("Column", copy.column, "is out of bound", columnsCount, leftSide ? "[leftSide]" : "[rightSide]", mirroredInfo);
+                    copy.column = columnsCount - 1;
+                } else if (copy.column < 0) {
+                    console.error("Column", copy.column, "is out of bound", 0, leftSide ? "[leftSide]" : "[rightSide]", mirroredInfo);
+                    copy.column = 0;
+                }
             }
 
             const unbind = factory(copy, layers, ci, gridConfig, sensors, dosInstance);
