@@ -36,6 +36,7 @@ export class DosInstance {
 
     options: DosOptions;
     mobileControls: boolean;
+    mirroredControls: boolean;
 
     private clickToStart: boolean;
     private unbindControls: () => void = () => {/**/};
@@ -56,6 +57,7 @@ export class DosInstance {
         this.layers.showLoadingLayer();
         this.createTransportLayer = options.createTransportLayer;
         this.mobileControls = pointers.bind.mobile;
+        this.mirroredControls = false;
         this.onMobileControlsChanged = () => { /**/ };
 
         if (this.emulatorFunction === "backend" && this.createTransportLayer === undefined) {
@@ -150,7 +152,7 @@ export class DosInstance {
         } else if (config.version === undefined) {
             this.unbindControls = initLegacyLayersControl(this.layers, config as LegacyLayersConfig, ci);
         } else {
-            this.unbindControls = initLayersControl(this.layers, config as LayersConfig, ci, this, layerName);
+            this.unbindControls = initLayersControl(this.layers, config as LayersConfig, ci, this, layerName, this.mirroredControls);
         }
     }
 
@@ -170,6 +172,13 @@ export class DosInstance {
         this.storedLayersConfig = this.layersConfig;
         this.setLayersConfig(null);
         this.onMobileControlsChanged(false);
+    }
+
+    public setMirroredControls(mirrored: boolean) {
+        this.mirroredControls = mirrored;
+        if (this.mobileControls) {
+            this.setLayersConfig(this.layersConfig);
+        }
     }
 
     public setOnMobileControlsChanged(handler: (visible: boolean) => void) {

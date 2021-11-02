@@ -22,7 +22,8 @@ export function initLayersControl(
     layersConfig: LayersConfig,
     ci: CommandInterface,
     dosInstance: DosInstance,
-    layerName?: string): () => void {
+    layerName?: string,
+    mirrored = false): () => void {
     let selectedLayer = layersConfig.layers[0];
     if (layerName !== undefined) {
         for (const next of layersConfig.layers) {
@@ -32,7 +33,7 @@ export function initLayersControl(
             }
         }
     }
-    return initLayerConfig(selectedLayer, layers, ci, dosInstance);
+    return initLayerConfig(selectedLayer, layers, ci, dosInstance, mirrored);
 }
 
 type Sensor = {
@@ -87,7 +88,8 @@ const factoryMapping: { [type: string]: ControlFactory } = {
 function initLayerConfig(layerConfig: LayerConfig,
     layers: Layers,
     ci: CommandInterface,
-    dosInstance: DosInstance): () => void {
+    dosInstance: DosInstance,
+    mirrored: boolean): () => void {
 
     const unbindKeyboard = keyboard(layers, ci);
     const unbindMouse = mouse(layers, ci);
@@ -102,6 +104,17 @@ function initLayerConfig(layerConfig: LayerConfig,
         const grid = getGrid(layerConfig.grid);
         const gridConfig = grid.getConfiguration(width, height);
         const sensors = new ControlSensors();
+
+        let doOffsetColumnInRow = -1;
+        if (layers.options.optionControls?.length === 0) {
+            for (const next of layerConfig.controls) {
+                if (next.type === "Options") {
+                    doOffsetColumnInRow = next.row;
+                    break;
+                }
+            }
+        }
+
         for (const next of layerConfig.controls) {
             const factory = factoryMapping[next.type];
             if (factory === undefined) {
@@ -109,7 +122,19 @@ function initLayerConfig(layerConfig: LayerConfig,
                 continue;
             }
 
-            const unbind = factory(next, layers, ci, gridConfig, sensors, dosInstance);
+            const copy = { ...next };
+            const columnCount = gridConfig.cells[next.row].length;
+            if (doOffsetColumnInRow === next.row &&
+                next.column >= columnCount / 2 &&
+                next.type !== "Options") {
+                copy.column++;
+            }
+
+            if (mirrored) {
+                copy.column = (columnCount - 1) - copy.column;
+            }
+
+            const unbind = factory(copy, layers, ci, gridConfig, sensors, dosInstance);
             unbindControls.push(unbind);
         }
     }
@@ -167,9 +192,9 @@ function createOptionsControl(optionControl: LayerControl,
     dosInstance: DosInstance) {
 
     if (layers.options.optionControls?.length === 0) {
-        return () => {/**/};
+        return () => {/**/ };
     }
-    
+
     if (layers.options.optionControls !== undefined &&
         layers.options.optionControls.length === 1 &&
         layers.options.optionControls[0] === "keyboard") {
@@ -558,7 +583,7 @@ function createNippleActivatorControl(nippleActivatorControl: LayerNippleActivat
             activeRow = targetRow;
         }
     });
-    
+
     let started = false;
     manager.on("start", () => {
         started = true;

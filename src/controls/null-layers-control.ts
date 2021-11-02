@@ -10,7 +10,10 @@ export function initNullLayersControl(
 
     const unbindKeyboard = keyboard(layers, ci);
     const unbindMouse = mouse(layers, ci);
-    const unbindOptions = options(layers, ["default"], () => {/**/}, 54, 54 / 4, 0);
+    const unbindOptions =
+        (layers.options.optionControls?.length === 0) ?
+            () => {/**/} :
+            options(layers, ["default"], () => {/**/}, 54, 54 / 4, 0);
 
     return () => {
         unbindKeyboard();
