@@ -14,6 +14,7 @@ import { notyf } from "./notification/notyf";
 import { save, load } from "./persist/save-load";
 import { getGrid } from "./controls/grid";
 import { pointers } from "./dom/pointer";
+import { LStorage } from "./dom/storage";
 
 import { DosInstance, DosFactoryType, DosOptions } from "./js-dos";
 
@@ -22,6 +23,7 @@ export class EmulatorsUi {
         layers, // DOM components that used by js-dos player
         lifecycle, // compnent that manges liefcycle events
         pointers, // abstraction over mouse, touch, pointer API
+        storage: new LStorage(undefined, "emulators.ui."), // localStorage abstaction
     };
 
     network = {

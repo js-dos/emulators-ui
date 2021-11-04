@@ -37,6 +37,9 @@ export class DosInstance {
     options: DosOptions;
     mobileControls: boolean;
     mirroredControls: boolean;
+    scaleControls: number;
+
+    storage: Storage;
 
     private clickToStart: boolean;
     private unbindControls: () => void = () => {/**/};
@@ -51,13 +54,19 @@ export class DosInstance {
 
         this.options = options;
         this.emulatorsUi = emulatorsUi;
+        this.storage = emulatorsUi.dom.storage;
         this.emulatorFunction = options.emulatorFunction || "dosboxWorker";
         this.clickToStart = options.clickToStart || false;
         this.layers = this.emulatorsUi.dom.layers(root, options.layersOptions);
         this.layers.showLoadingLayer();
         this.createTransportLayer = options.createTransportLayer;
         this.mobileControls = pointers.bind.mobile;
-        this.mirroredControls = false;
+        
+        this.mirroredControls = this.storage.getItem("mirroredControls") === "true";
+        
+        const scaleControlsValue = Number.parseFloat(this.storage.getItem("scaleControls") ?? "1.0");
+        this.scaleControls = Number.isNaN(scaleControlsValue) ? 1.0 : scaleControlsValue;
+        
         this.onMobileControlsChanged = () => { /**/ };
 
         if (this.emulatorFunction === "backend" && this.createTransportLayer === undefined) {
@@ -110,6 +119,7 @@ export class DosInstance {
         await this.setLayersConfig(extractLayersConfig(config))
 
         if (!this.mobileControls) {
+            this.mobileControls = true; // force disabling
             this.disableMobileControls();
         }
 
@@ -152,7 +162,7 @@ export class DosInstance {
         } else if (config.version === undefined) {
             this.unbindControls = initLegacyLayersControl(this.layers, config as LegacyLayersConfig, ci);
         } else {
-            this.unbindControls = initLayersControl(this.layers, config as LayersConfig, ci, this, layerName, this.mirroredControls);
+            this.unbindControls = initLayersControl(this.layers, config as LayersConfig, ci, this, this.mirroredControls, this.scaleControls, layerName);
         }
     }
 
@@ -160,24 +170,55 @@ export class DosInstance {
         return this.layersConfig;
     }
 
-    public enableMobileControls() {
+    public async enableMobileControls() {
+        if (this.mobileControls) {
+            return;
+        }
         this.mobileControls = true;
-        this.setLayersConfig(this.storedLayersConfig);
+        await this.setLayersConfig(this.storedLayersConfig);
         this.storedLayersConfig = null;
         this.onMobileControlsChanged(true);
     }
 
-    public disableMobileControls() {
+    public async disableMobileControls() {
+        if (!this.mobileControls) {
+            return;
+        }
         this.mobileControls = false;
         this.storedLayersConfig = this.layersConfig;
-        this.setLayersConfig(null);
+        await this.setLayersConfig(null);
         this.onMobileControlsChanged(false);
     }
 
-    public setMirroredControls(mirrored: boolean) {
+    public async setMirroredControls(mirrored: boolean) {
+        if (this.mirroredControls === mirrored) {
+            return;
+        }
         this.mirroredControls = mirrored;
+        this.storage.setItem("mirroredControls", mirrored + "");
+        if (mirrored) {
+            if (this.mobileControls) {
+                await this.setLayersConfig(this.layersConfig);
+            } else {
+                await this.enableMobileControls();
+            }
+        } else {
+            if (this.mobileControls) {
+                await this.setLayersConfig(this.layersConfig);
+            } else {
+                // do nothing
+            }
+        }
+    }
+
+    public async setScaleControls(scale: number) {
+        if (scale === this.scaleControls) {
+            return;
+        }
+        this.scaleControls = scale;
+        this.storage.setItem("scaleControls", scale + "");
         if (this.mobileControls) {
-            this.setLayersConfig(this.layersConfig);
+            await this.setLayersConfig(this.layersConfig);
         }
     }
 

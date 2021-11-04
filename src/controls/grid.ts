@@ -17,7 +17,7 @@ export interface GridConfiguration {
 }
 
 export interface Grid {
-    getConfiguration(width: number, height: number): GridConfiguration;
+    getConfiguration(width: number, height: number, scale?: number): GridConfiguration;
 }
 
 export function getGrid(gridType: GridType) {
@@ -33,15 +33,15 @@ function getSquareGrid(): Grid {
     class SquareGrid implements Grid {
         aspect = 200 / 320;
 
-        getConfiguration(width: number, height: number): GridConfiguration {
+        getConfiguration(width: number, height: number, scale = 1): GridConfiguration {
             const cols = this.getCols();
             const rows = this.getRows();
             const middleCol = Math.floor(cols / 2);
             const middleRow = Math.floor(rows / 2);
             const columnsPadding = width * 5 / 100 / 2;
             const rowsPadding = columnsPadding;
-            const columnWidth = (width - columnsPadding * 2) / cols;
-            const rowHeight = (height - rowsPadding * 2) / rows;
+            const columnWidth = (width - columnsPadding * 2) / cols * scale;
+            const rowHeight = (height - rowsPadding * 2) / rows * scale;
             const size = Math.min(columnWidth, rowHeight);
             const cells: Cell[][] = []; 
             for (let row = 0; row < rows; ++row) {
@@ -86,15 +86,15 @@ function getHoneyCombGrid(): Grid {
     class SquareGrid implements Grid {
         aspect = 200 / 320;
 
-        getConfiguration(width: number, height: number): GridConfiguration {
+        getConfiguration(width: number, height: number, scale = 1): GridConfiguration {
             const cols = this.getCols();
             const rows = this.getRows();
             const middleCol = Math.floor(cols / 2);
             const middleRow = Math.floor(rows / 2);
             const columnsPadding = width * 5 / 100 / 2;
             const rowsPadding = columnsPadding;
-            const columnWidth = (width - columnsPadding * 2) / cols;
-            const rowHeight = (height - rowsPadding * 2) / rows;
+            const columnWidth = (width - columnsPadding * 2) / cols * scale;
+            const rowHeight = (height - rowsPadding * 2) / rows * scale;
             const size = Math.min(columnWidth, rowHeight);
             const cells: Cell[][] = [];
             for (let row = 0; row < rows; ++row) {

@@ -22,8 +22,9 @@ export function initLayersControl(
     layersConfig: LayersConfig,
     ci: CommandInterface,
     dosInstance: DosInstance,
-    layerName?: string,
-    mirrored = false): () => void {
+    mirrored: boolean,
+    scale: number,
+    layerName?: string): () => void {
     let selectedLayer = layersConfig.layers[0];
     if (layerName !== undefined) {
         for (const next of layersConfig.layers) {
@@ -33,7 +34,7 @@ export function initLayersControl(
             }
         }
     }
-    return initLayerConfig(selectedLayer, layers, ci, dosInstance, mirrored);
+    return initLayerConfig(selectedLayer, layers, ci, dosInstance, mirrored, scale);
 }
 
 interface Sensor {
@@ -96,7 +97,8 @@ function initLayerConfig(layerConfig: LayerConfig,
     layers: Layers,
     ci: CommandInterface,
     dosInstance: DosInstance,
-    mirrored: boolean): () => void {
+    mirrored: boolean,
+    scale: number): () => void {
 
     const unbindKeyboard = keyboard(layers, ci);
     const unbindMouse = mouse(layers, ci);
@@ -109,7 +111,7 @@ function initLayerConfig(layerConfig: LayerConfig,
         unbindControls.splice(0, unbindControls.length);
 
         const grid = getGrid(layerConfig.grid);
-        const gridConfig = grid.getConfiguration(width, height);
+        const gridConfig = grid.getConfiguration(width, height, scale);
         const sensors = new ControlSensors();
 
         let doOffsetColumnInRow = -1;
