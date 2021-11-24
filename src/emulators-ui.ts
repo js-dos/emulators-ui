@@ -5,7 +5,7 @@ import { _2d } from "./graphics/_2d";
 import { webGl } from "./graphics/webgl";
 import { video } from "./graphics/video";
 import { keyboard } from "./controls/keyboard";
-import { mouse } from "./controls/mouse";
+import { mouse } from "./controls/mouse/mouse-common";
 import { nipple } from "./controls/nipple";
 import { options } from "./controls/options";
 import { domToKeyCode, domToKeyCodes, keyCodesToDom, namedKeyCodes } from "./dom/keys";

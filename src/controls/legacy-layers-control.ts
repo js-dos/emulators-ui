@@ -2,12 +2,14 @@ import { LegacyLayersConfig } from "./layers-config";
 import { Layers } from "../dom/layers";
 import { CommandInterface } from "emulators";
 import { deprecatedButton } from "./button";
-import { mouse } from "./mouse";
+import { mouse } from "./mouse/mouse-common";
 import { nipple } from "./nipple";
 import { options } from "./options";
 import { keyboard } from "./keyboard";
+import { DosInstance } from "../js-dos";
 
 export function initLegacyLayersControl(
+    dosInstance: DosInstance,
     layers: Layers,
     layersConfig: LegacyLayersConfig,
     ci: CommandInterface) {
@@ -41,7 +43,7 @@ export function initLegacyLayersControl(
         if (layer.gestures !== undefined && layer.gestures.length > 0) {
             unbind.gestures = nipple(layers, ci, layer.gestures);
         } else {
-            unbind.mouse = mouse(layers, ci);
+            unbind.mouse = mouse(dosInstance.autolock, dosInstance.sensitivity, layers, ci);
         }
 
         if (layer.buttons !== undefined && layer.buttons.length) {

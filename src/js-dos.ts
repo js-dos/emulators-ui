@@ -39,6 +39,9 @@ export class DosInstance {
     mirroredControls: boolean;
     scaleControls: number;
 
+    autolock: boolean;
+    sensitivity: number;
+
     storage: Storage;
 
     private clickToStart: boolean;
@@ -61,11 +64,15 @@ export class DosInstance {
         this.layers.showLoadingLayer();
         this.createTransportLayer = options.createTransportLayer;
         this.mobileControls = pointers.bind.mobile;
+        this.autolock = false;
         
         this.mirroredControls = this.storage.getItem("mirroredControls") === "true";
         
         const scaleControlsValue = Number.parseFloat(this.storage.getItem("scaleControls") ?? "1.0");
         this.scaleControls = Number.isNaN(scaleControlsValue) ? 1.0 : scaleControlsValue;
+
+        const sensitivityValue = Number.parseFloat(this.storage.getItem("sensitivity") ?? "1.0");
+        this.sensitivity = Number.isNaN(sensitivityValue) ? 1.0 : sensitivityValue;
         
         this.onMobileControlsChanged = () => { /**/ };
 
@@ -116,6 +123,7 @@ export class DosInstance {
         emulatorsUi.dom.lifecycle(ci);
 
         const config = await ci.config();
+        this.autolock = config.output?.options?.autolock?.value === true;
         await this.setLayersConfig(extractLayersConfig(config))
 
         if (!this.mobileControls) {
@@ -158,9 +166,9 @@ export class DosInstance {
         this.unbindControls();
 
         if (config === null) {
-            this.unbindControls = initNullLayersControl(this.layers, ci);
+            this.unbindControls = initNullLayersControl(this, this.layers, ci);
         } else if (config.version === undefined) {
-            this.unbindControls = initLegacyLayersControl(this.layers, config as LegacyLayersConfig, ci);
+            this.unbindControls = initLegacyLayersControl(this, this.layers, config as LegacyLayersConfig, ci);
         } else {
             this.unbindControls = initLayersControl(this.layers, config as LayersConfig, ci, this, this.mirroredControls, this.scaleControls, layerName);
         }
@@ -220,6 +228,23 @@ export class DosInstance {
         if (this.mobileControls) {
             await this.setLayersConfig(this.layersConfig);
         }
+    }
+
+    public async setSensitivity(sensitivity: number) {
+        if (sensitivity === this.sensitivity) {
+            return;
+        }
+        this.sensitivity = sensitivity;
+        this.storage.setItem("sensitivity", sensitivity + "");
+        await this.setLayersConfig(this.layersConfig);
+    }
+
+    public async setAutolock(autolock: boolean) {
+        if (autolock === this.autolock) {
+            return;
+        }
+        this.autolock = autolock;
+        await this.setLayersConfig(this.layersConfig);
     }
 
     public setOnMobileControlsChanged(handler: (visible: boolean) => void) {

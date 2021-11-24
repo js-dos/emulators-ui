@@ -1,109 +1,62 @@
 import { CommandInterface } from "emulators";
-import { Layers } from "../dom/layers";
-import { pointer, getPointerState } from "../dom/pointer";
+import { Layers } from "../../dom/layers";
+import { pointer, getPointerState } from "../../dom/pointer";
+import { mouseNipple } from "./mouse-nipple";
+import { mouseNotLocked } from "./mouse-not-locked";
+import { mouseLocked } from "./mouse-locked";
 
+const insensitivePadding = 1 / 100;
 
-export function mouse(layers: Layers,
-    ci: CommandInterface) {
+export function mapXY(eX: number, eY: number,
+    ci: CommandInterface, layers: Layers) {
+    const frameWidth = ci.width();
+    const frameHeight = ci.height();
+    const containerWidth = layers.width;
+    const containerHeight = layers.height;
 
-    let autolock = false;
-    if (pointer.canLock) {
-        ci.config()
-            .then((config) => autolock = config.output?.options?.autolock?.value === true)
-            .catch(console.error);
+    const aspect = frameWidth / frameHeight;
+
+    let width = containerWidth;
+    let height = containerWidth / aspect;
+
+    if (height > containerHeight) {
+        height = containerHeight;
+        width = containerHeight * aspect;
     }
 
-    const insensitivePadding = 1 / 100;
+    const top = (containerHeight - height) / 2;
+    const left = (containerWidth - width) / 2;
 
-    function mapXY(eX: number, eY: number) {
-        const frameWidth = ci.width();
-        const frameHeight = ci.height();
-        const containerWidth = layers.width;
-        const containerHeight = layers.height;
+    let x = Math.max(0, Math.min(1, (eX - left) / width));
+    let y = Math.max(0, Math.min(1, (eY - top) / height));
 
-        const aspect = frameWidth / frameHeight;
-
-        let width = containerWidth;
-        let height = containerWidth / aspect;
-
-        if (height > containerHeight) {
-            height = containerHeight;
-            width = containerHeight * aspect;
-        }
-
-        const top = (containerHeight - height) / 2;
-        const left = (containerWidth - width) / 2;
-
-        let x = Math.max(0, Math.min(1, (eX - left) / width));
-        let y = Math.max(0, Math.min(1, (eY - top) / height));
-
-        if (x <= insensitivePadding) {
-            x = 0;
-        }
-
-        if (x >= (1 - insensitivePadding)) {
-            x = 1;
-        }
-
-        if (y <= insensitivePadding) {
-            y = 0;
-        }
-
-        if (y >= (1 - insensitivePadding)) {
-            y = 1;
-        }
-
-        return {
-            x,
-            y,
-        };
+    if (x <= insensitivePadding) {
+        x = 0;
     }
 
-    function isNotLocked() {
-        return document.pointerLockElement !== el;
+    if (x >= (1 - insensitivePadding)) {
+        x = 1;
     }
 
-    function onMouseDown(x: number, y: number, button: number) {
-        if (autolock && isNotLocked()) {
-            const requestPointerLock = el.requestPointerLock ||
-                (el as any).mozRequestPointerLock ||
-                (el as any).webkitRequestPointerLock;
-
-            requestPointerLock.call(el);
-        }
-
-        if (isNotLocked()) {
-            const xy = mapXY(x, y);
-            ci.sendMouseMotion(xy.x, xy.y);
-        }
-
-        ci.sendMouseButton(button, true);
+    if (y <= insensitivePadding) {
+        y = 0;
     }
 
-    function onMouseUp(x: number, y: number, button: number) {
-        if (isNotLocked()) {
-            const xy = mapXY(x, y);
-            ci.sendMouseMotion(xy.x, xy.y);
-        }
-        ci.sendMouseButton(button, false);
+    if (y >= (1 - insensitivePadding)) {
+        y = 1;
     }
 
-    function onMouseMove(x: number, y: number, mX: number, mY: number) {
-        if (isNotLocked()) {
-            const xy = mapXY(x, y);
-            ci.sendMouseMotion(xy.x, xy.y);
-        } else {
-            (ci as any).sendMouseRelativeMotion(mX, mY);
-        }
-    }
+    return {
+        x,
+        y,
+    };
+}
 
-    function onMouseLeave(x: number, y: number) {
-        const xy = mapXY(x, y);
-        ci.sendMouseMotion(xy.x, xy.y);
-    }
-
-    const el = layers.mouseOverlay;
-
+export function mount(el: HTMLDivElement, layers: Layers,
+    onMouseDown: (x: number, y: number, button: number) => void,
+    onMouseMove: (x: number, y: number, mX: number, mY: number) => void,
+    onMouseUp: (x: number,y: number, button: number) => void,
+    onMouseLeave: (x: number, y: number) => void) {
 
     // eslint-disable-next-line
     function preventDefaultIfNeeded(e: Event) {
@@ -219,4 +172,16 @@ export function mouse(layers: Layers,
             el.removeEventListener(next, onLeave, options);
         }
     };
+}
+
+export function mouse(autolock: boolean, sensitivity: number, layers: Layers, ci: CommandInterface) {
+    if (autolock && !pointer.canLock) {
+        return mouseNipple(sensitivity, layers, ci);
+    }
+
+    if (autolock) {
+        return mouseLocked(sensitivity, layers, ci);
+    }
+
+    return mouseNotLocked(layers, ci);
 }

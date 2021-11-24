@@ -5,7 +5,7 @@ function initBind() {
     const isTouch = isMobile && !!('ontouchstart' in window);
     const isPointer = isMobile && (window.PointerEvent ? true : false);
     const isMSPointer = isMobile && (window.MSPointerEvent ? true : false);
-    let canLock = true;
+    let canLock = !isMobile;
 
     const starters: string[] = [];
     const changers: string[] = [];

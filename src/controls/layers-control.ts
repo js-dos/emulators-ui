@@ -10,7 +10,7 @@ import { getGrid, GridConfiguration } from "./grid";
 import { createButton } from "./button";
 import { DosInstance } from "../js-dos";
 import { keyboard } from "./keyboard";
-import { mouse } from "./mouse";
+import { mouse } from "./mouse/mouse-common";
 import { options } from "./options";
 import { pointer } from "../dom/pointer";
 
@@ -101,7 +101,7 @@ function initLayerConfig(layerConfig: LayerConfig,
     scale: number): () => void {
 
     const unbindKeyboard = keyboard(layers, ci);
-    const unbindMouse = mouse(layers, ci);
+    const unbindMouse = mouse(dosInstance.autolock, dosInstance.sensitivity, layers, ci);
 
     const unbindControls: (() => void)[] = [];
     function onResize(width: number, height: number) {
