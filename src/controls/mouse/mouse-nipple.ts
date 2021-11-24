@@ -43,7 +43,7 @@ export function mouseNipple(sensitivity: number, layers: Layers, ci: CommandInte
     let dy = 0;
 
     const intervalId = setInterval(() => {
-       (ci as any).sendMouseRelativeMotion(dx, dy); 
+        (ci as any).sendMouseRelativeMotion(dx, dy);
     }, 16);
 
     nipple.on("start", () => {
@@ -52,11 +52,11 @@ export function mouseNipple(sensitivity: number, layers: Layers, ci: CommandInte
         dy = 0;
     });
 
-    nipple.on("move", function (evt: any, data: any) {
-       const { x, y } = data.vector;
-       
-       dx = x * data.distance * sensitivity;
-       dy = -y * data.distance * sensitivity;
+    nipple.on("move", function(evt: any, data: any) {
+        const { x, y } = data.vector;
+
+        dx = x * data.distance * sensitivity;
+        dy = -y * data.distance * sensitivity;
     });
 
     nipple.on("end", () => {
@@ -73,5 +73,5 @@ export function mouseNipple(sensitivity: number, layers: Layers, ci: CommandInte
         }
         clearInterval(intervalId);
         nipple.destroy();
-    } 
+    };
 }

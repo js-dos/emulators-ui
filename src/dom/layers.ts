@@ -2,7 +2,13 @@ import { Notyf } from "notyf";
 import Keyboard from "simple-keyboard";
 import { createDiv, stopPropagation } from "./helpers";
 
-import { domToKeyCode, KBD_enter, KBD_leftshift, KBD_backspace, KBD_capslock, KBD_tab, KBD_space, KBD_esc, KBD_leftctrl, KBD_leftalt, KBD_comma, KBD_period, KBD_quote, KBD_semicolon, KBD_leftbracket, KBD_rightbracket } from "./keys";
+/* eslint-disable camelcase */
+import { domToKeyCode, KBD_enter, KBD_leftshift,
+    KBD_backspace, KBD_capslock, KBD_tab, KBD_space, KBD_esc,
+    KBD_leftctrl, KBD_leftalt, KBD_comma, KBD_period, KBD_quote,
+    KBD_semicolon, KBD_leftbracket, KBD_rightbracket,
+} from "./keys";
+/* eslint-enable camelcase */
 
 // eslint-disable-next-line
 const elementResizeDetector = require("element-resize-detector");
@@ -90,13 +96,15 @@ export class Layers {
         this.height = root.offsetHeight;
 
         this.onResize = [];
-        this.onKeyDown = () => { /**/ };
-        this.onKeyUp = () => { /**/ };
-        this.onKeyPress = () => { /**/ };
-        this.onKeysPress = () => { /**/ };
-        this.onSave = () => { return Promise.reject(new Error("Not implemented")); };
-        this.onSaveStarted = () => { /**/ };
-        this.onSaveEnded = () => { /**/ };
+        this.onKeyDown = () => {/**/};
+        this.onKeyUp = () => {/**/};
+        this.onKeyPress = () => {/**/};
+        this.onKeysPress = () => {/**/};
+        this.onSave = () => {
+            return Promise.reject(new Error("Not implemented"));
+        };
+        this.onSaveStarted = () => {/**/};
+        this.onSaveEnded = () => {/**/};
 
         resizeDetector.listenTo(this.root, (el: HTMLElement) => {
             if (el !== root) {
@@ -119,10 +127,10 @@ export class Layers {
             if (document.fullscreenElement !== this.fullscreenElement) {
                 this.fullscreen = false;
                 for (const next of this.onFullscreenChanged) {
-                   next(this.fullscreen);
+                    next(this.fullscreen);
                 }
             }
-        }
+        };
     }
 
     private initKeyEvents() {
@@ -265,7 +273,7 @@ export class Layers {
     setOnSaveStarted(callback: () => void) {
         this.onSaveStarted = callback;
     }
-    
+
     setOnSaveEnded(callback: () => void) {
         this.onSaveEnded = callback;
     }
@@ -296,26 +304,30 @@ export class Layers {
 
         const layout = {
             en: [
-                '{esc} ` 1 2 3 4 5 6 7 8 9 0 - = {bksp}',
-                'q w e r t y u i o p { } \\',
-                'a s d f g h j k l ; \' [ {enter}',
-                '⎘ z x c v b n m , . / ] {space}',
+                "{esc} ` 1 2 3 4 5 6 7 8 9 0 - = {bksp}",
+                "q w e r t y u i o p { } \\",
+                "a s d f g h j k l ; ' [ {enter}",
+                "⎘ z x c v b n m , . / ] {space}",
             ],
         };
         const enLayoutDisplay = {
-            '{esc}': 'ESC',
-            '{bksp}': 'Backspace',
-            '{enter}': '⏎',
-            '{space}': 'Space',
-        }; 
+            "{esc}": "ESC",
+            "{bksp}": "Backspace",
+            "{enter}": "⏎",
+            "{space}": "Space",
+        };
         const ruLayoutDisplay = {
-            '{esc}': 'ESC',
-            '{bksp}': 'Backspace',
-            '{enter}': '⏎',
-            '{space}': 'Space',
-            'q': 'й', 'w': 'ц', 'e': 'у', 'r': 'к', 't': 'е', 'y': 'н', 'u': 'г', 'i': 'ш', 'o': 'щ', 'p': 'з', '{': 'х', '}': 'ъ',
-            'a': 'ф', 's': 'ы', 'd': 'в', 'f': 'а', 'g': 'п', 'h': 'р', 'j': 'о', 'k': 'л', 'l': 'д', ';': 'ж', '\'': 'э',
-            'z': 'я', 'x': 'ч', 'c': 'с', 'v': 'м', 'b': 'и', 'n': 'т', 'm': 'ь', ',': 'б', '.': 'ю', 
+            "{esc}": "ESC",
+            "{bksp}": "Backspace",
+            "{enter}": "⏎",
+            "{space}": "Space",
+            "q": "й", "w": "ц", "e": "у", "r": "к", "t": "е",
+            "y": "н", "u": "г", "i": "ш", "o": "щ", "p": "з",
+            "{": "х", "}": "ъ", "a": "ф", "s": "ы", "d": "в",
+            "f": "а", "g": "п", "h": "р", "j": "о", "k": "л",
+            "l": "д", ";": "ж", "'": "э", "z": "я", "x": "ч",
+            "c": "с", "v": "м", "b": "и", "n": "т", "m": "ь",
+            ",": "б", ".": "ю",
         };
         const displayOrder = [enLayoutDisplay, ruLayoutDisplay];
         let displayIndex = 0;
@@ -330,7 +342,7 @@ export class Layers {
             layout,
             layoutName: "en",
             display: displayOrder[displayIndex],
-            onKeyPress: button => {
+            onKeyPress: (button) => {
                 if (button === "⎘") {
                     displayIndex = (displayIndex + 1) % displayOrder.length;
                     keyboard.setOptions({
@@ -352,7 +364,7 @@ export class Layers {
             stopMouseUpPropagation: true,
             autoUseTouchEvents: true,
             useMouseEvents: true,
-        });        
+        });
 
         this.toggleKeyboard = () => {
             keyboardVisible = !keyboardVisible;
@@ -403,6 +415,7 @@ function createClickToStartLayer() {
 `);
 }
 
+/* eslint-disable camelcase */
 function buttonToCode(button: string): number[] {
     if (button.length > 1) {
         if (button === "{enter}") {
@@ -448,3 +461,5 @@ function buttonToCode(button: string): number[] {
 
     return [keyCode];
 }
+
+/* eslint-enable camelcase */

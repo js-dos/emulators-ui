@@ -6,7 +6,7 @@ import { error } from "./log";
 import del from "del";
 
 import sourcemaps from "gulp-sourcemaps";
-import uglify from "gulp-uglify";
+import terser from "gulp-terser";
 import size from "gulp-size";
 import browserify from "browserify";
 import buffer from "vinyl-buffer";
@@ -40,7 +40,7 @@ function js() {
         debug: true,
         entries: ["src/emulators-ui.ts"],
         cache: {},
-        packageCache: {}
+        packageCache: {},
     })
         .plugin(tsify, {
             "target": "esnext",
@@ -48,15 +48,15 @@ function js() {
         .transform("babelify", {
             presets: [["@babel/preset-env", {
                 "useBuiltIns": "usage",
-                "corejs": 2,
+                "corejs": 3,
             }]],
-            extensions: [".ts"]
+            extensions: [".ts"],
         })
         .bundle()
         .pipe(source("emulators-ui.js"))
         .pipe(buffer())
         .pipe(sourcemaps.init({ loadMaps: true }))
-        .pipe(uglify())
+        .pipe(terser())
         .pipe(sourcemaps.write("./"))
         .pipe(size({ showFiles: true, showTotal: false }))
         .pipe(dest("dist"));

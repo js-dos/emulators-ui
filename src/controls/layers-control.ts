@@ -4,7 +4,7 @@ import {
     LayersConfig, LayerConfig, LayerKeyControl,
     LayerControl, LayerSwitchControl, LayerScreenMoveControl,
     LayerPointerButtonControl, LayerPointerMoveControl, LayerPointerResetControl,
-    LayerPointerToggleControl, LayerNippleActivatorControl
+    LayerPointerToggleControl, LayerNippleActivatorControl,
 } from "./layers-config";
 import { getGrid, GridConfiguration } from "./grid";
 import { createButton } from "./button";
@@ -50,7 +50,6 @@ interface MirroredInfo {
 }
 
 class ControlSensors {
-
     sensors: { [key: string]: Sensor } = {};
 
     activate(row: number, column: number) {
@@ -70,7 +69,6 @@ class ControlSensors {
     register(row: number, column: number, sensor: Sensor) {
         this.sensors[column + "_" + row] = sensor;
     }
-
 }
 
 type ControlFactory = (control: any,
@@ -94,12 +92,11 @@ const factoryMapping: { [type: string]: ControlFactory } = {
 };
 
 function initLayerConfig(layerConfig: LayerConfig,
-    layers: Layers,
-    ci: CommandInterface,
-    dosInstance: DosInstance,
-    mirrored: boolean,
-    scale: number): () => void {
-
+                         layers: Layers,
+                         ci: CommandInterface,
+                         dosInstance: DosInstance,
+                         mirrored: boolean,
+                         scale: number): () => void {
     const unbindKeyboard = keyboard(layers, ci);
     const unbindMouse = mouse(dosInstance.autolock, dosInstance.sensitivity, layers, ci);
 
@@ -180,10 +177,12 @@ function initLayerConfig(layerConfig: LayerConfig,
                 }
 
                 if (copy.column >= columnsCount) {
-                    console.error("Column", copy.column, "is out of bound", columnsCount, leftSide ? "[leftSide]" : "[rightSide]", mirroredInfo);
+                    console.error("Column", copy.column, "is out of bound",
+                        columnsCount, leftSide ? "[leftSide]" : "[rightSide]", mirroredInfo);
                     copy.column = columnsCount - 1;
                 } else if (copy.column < 0) {
-                    console.error("Column", copy.column, "is out of bound", 0, leftSide ? "[leftSide]" : "[rightSide]", mirroredInfo);
+                    console.error("Column", copy.column, "is out of bound",
+                        0, leftSide ? "[leftSide]" : "[rightSide]", mirroredInfo);
                     copy.column = 0;
                 }
             }
@@ -207,10 +206,10 @@ function initLayerConfig(layerConfig: LayerConfig,
 }
 
 function createKeyControl(keyControl: LayerKeyControl,
-    layers: Layers,
-    ci: CommandInterface,
-    gridConfig: GridConfiguration,
-    sensors: ControlSensors,
+                          layers: Layers,
+                          ci: CommandInterface,
+                          gridConfig: GridConfiguration,
+                          sensors: ControlSensors,
     // eslint-disable-next-line
     dosInstance: DosInstance) {
     const { cells, columnWidth } = gridConfig;
@@ -237,16 +236,16 @@ function createKeyControl(keyControl: LayerKeyControl,
 }
 
 function createOptionsControl(optionControl: LayerControl,
-    layers: Layers,
-    ci: CommandInterface,
-    gridConfig: GridConfiguration,
+                              layers: Layers,
+                              ci: CommandInterface,
+                              gridConfig: GridConfiguration,
     // eslint-disable-next-line
     sensors: ControlSensors,
     // eslint-disable-next-line
     dosInstance: DosInstance) {
 
     if (layers.options.optionControls?.length === 0) {
-        return () => {/**/ };
+        return () => {/**/};
     }
 
     if (layers.options.optionControls !== undefined &&
@@ -263,16 +262,16 @@ function createOptionsControl(optionControl: LayerControl,
     const left = centerX - columnWidth / 2;
     const right = gridConfig.width - left - columnWidth;
 
-    return options(layers, ["default"], () => {/**/ },
+    return options(layers, ["default"], () => {/**/},
         columnWidth,
         top,
         right);
 }
 
 function createKeyboardControl(keyboardControl: LayerControl,
-    layers: Layers,
-    ci: CommandInterface,
-    gridConfig: GridConfiguration,
+                               layers: Layers,
+                               ci: CommandInterface,
+                               gridConfig: GridConfiguration,
     // eslint-disable-next-line
     sensors: ControlSensors,
     // eslint-disable-next-line
@@ -302,16 +301,16 @@ function createKeyboardControl(keyboardControl: LayerControl,
     return () => {
         layers.mouseOverlay.removeChild(button);
         layers.removeOnKeyboardVisibility(onKeyboardVisibility);
-    }
+    };
 }
 
 function createSwitchControl(switchControl: LayerSwitchControl,
-    layers: Layers,
-    ci: CommandInterface,
-    gridConfig: GridConfiguration,
+                             layers: Layers,
+                             ci: CommandInterface,
+                             gridConfig: GridConfiguration,
     // eslint-disable-next-line
     sensors: ControlSensors,
-    dosInstance: DosInstance) {
+                             dosInstance: DosInstance) {
     const { cells, columnWidth } = gridConfig;
     const { row, column } = switchControl;
     const { centerX, centerY } = cells[row][column];
@@ -327,14 +326,14 @@ function createSwitchControl(switchControl: LayerSwitchControl,
     layers.mouseOverlay.appendChild(button);
     return () => {
         layers.mouseOverlay.removeChild(button);
-    }
+    };
 }
 
 function createScreenMoveControl(screenMoveControl: LayerScreenMoveControl,
-    layers: Layers,
-    ci: CommandInterface,
-    gridConfig: GridConfiguration,
-    sensors: ControlSensors,
+                                 layers: Layers,
+                                 ci: CommandInterface,
+                                 gridConfig: GridConfiguration,
+                                 sensors: ControlSensors,
     // eslint-disable-next-line
     dosInstance: DosInstance) {
     const { cells, columnWidth } = gridConfig;
@@ -367,7 +366,7 @@ function createScreenMoveControl(screenMoveControl: LayerScreenMoveControl,
         onUp: () => {
             ci.sendMouseMotion(0.5, 0.5);
         },
-    }
+    };
     const button = createButton(screenMoveControl.symbol, handler, columnWidth);
 
     button.style.position = "absolute";
@@ -382,14 +381,14 @@ function createScreenMoveControl(screenMoveControl: LayerScreenMoveControl,
     layers.mouseOverlay.appendChild(button);
     return () => {
         layers.mouseOverlay.removeChild(button);
-    }
+    };
 }
 
 function createPointerButtonControl(pointerButtonControl: LayerPointerButtonControl,
-    layers: Layers,
-    ci: CommandInterface,
-    gridConfig: GridConfiguration,
-    sensors: ControlSensors,
+                                    layers: Layers,
+                                    ci: CommandInterface,
+                                    gridConfig: GridConfiguration,
+                                    sensors: ControlSensors,
     // eslint-disable-next-line
     dosInstance: DosInstance) {
     const { cells, columnWidth } = gridConfig;
@@ -410,8 +409,8 @@ function createPointerButtonControl(pointerButtonControl: LayerPointerButtonCont
             } else {
                 ci.sendMouseButton(pointerButtonControl.button, false);
             }
-        }
-    }
+        },
+    };
     const button = createButton(pointerButtonControl.symbol, handler, columnWidth);
 
     button.style.position = "absolute";
@@ -426,14 +425,14 @@ function createPointerButtonControl(pointerButtonControl: LayerPointerButtonCont
     layers.mouseOverlay.appendChild(button);
     return () => {
         layers.mouseOverlay.removeChild(button);
-    }
+    };
 }
 
 function createPointerMoveControl(pointerMoveControl: LayerPointerMoveControl,
-    layers: Layers,
-    ci: CommandInterface,
-    gridConfig: GridConfiguration,
-    sensors: ControlSensors,
+                                  layers: Layers,
+                                  ci: CommandInterface,
+                                  gridConfig: GridConfiguration,
+                                  sensors: ControlSensors,
     // eslint-disable-next-line
     dosInstance: DosInstance) {
     const { cells, columnWidth } = gridConfig;
@@ -447,7 +446,7 @@ function createPointerMoveControl(pointerMoveControl: LayerPointerMoveControl,
         onUp: () => {
             ci.sendMouseMotion(x, y);
         },
-    }
+    };
     const button = createButton(pointerMoveControl.symbol, handler, columnWidth);
 
     button.style.position = "absolute";
@@ -462,14 +461,14 @@ function createPointerMoveControl(pointerMoveControl: LayerPointerMoveControl,
     layers.mouseOverlay.appendChild(button);
     return () => {
         layers.mouseOverlay.removeChild(button);
-    }
+    };
 }
 
 function createPointerResetControl(pointerResetControl: LayerPointerResetControl,
-    layers: Layers,
-    ci: CommandInterface,
-    gridConfig: GridConfiguration,
-    sensors: ControlSensors,
+                                   layers: Layers,
+                                   ci: CommandInterface,
+                                   gridConfig: GridConfiguration,
+                                   sensors: ControlSensors,
     // eslint-disable-next-line
     dosInstance: DosInstance) {
     const { cells, columnWidth } = gridConfig;
@@ -480,7 +479,7 @@ function createPointerResetControl(pointerResetControl: LayerPointerResetControl
         onDown: () => {
             ci.sendMouseSync();
         },
-    }
+    };
     const button = createButton(pointerResetControl.symbol, handler, columnWidth);
 
     button.style.position = "absolute";
@@ -496,14 +495,14 @@ function createPointerResetControl(pointerResetControl: LayerPointerResetControl
     layers.mouseOverlay.appendChild(button);
     return () => {
         layers.mouseOverlay.removeChild(button);
-    }
+    };
 }
 
 function createPointerToggleControl(pointerToggleControl: LayerPointerToggleControl,
-    layers: Layers,
-    ci: CommandInterface,
-    gridConfig: GridConfiguration,
-    sensors: ControlSensors,
+                                    layers: Layers,
+                                    ci: CommandInterface,
+                                    gridConfig: GridConfiguration,
+                                    sensors: ControlSensors,
     // eslint-disable-next-line
     dosInstance: DosInstance) {
     const { cells, columnWidth } = gridConfig;
@@ -512,7 +511,7 @@ function createPointerToggleControl(pointerToggleControl: LayerPointerToggleCont
 
     const handler = {
         onDown: () => {
-            layers.pointerDisabled = !layers.pointerDisabled
+            layers.pointerDisabled = !layers.pointerDisabled;
             if (layers.pointerDisabled) {
                 if (!button.classList.contains("emulator-button-highlight")) {
                     button.classList.add("emulator-button-highlight");
@@ -521,7 +520,7 @@ function createPointerToggleControl(pointerToggleControl: LayerPointerToggleCont
                 button.classList.remove("emulator-button-highlight");
             }
         },
-    }
+    };
     const button = createButton(pointerToggleControl.symbol, handler, columnWidth);
 
     button.style.position = "absolute";
@@ -537,13 +536,13 @@ function createPointerToggleControl(pointerToggleControl: LayerPointerToggleCont
     layers.mouseOverlay.appendChild(button);
     return () => {
         layers.mouseOverlay.removeChild(button);
-    }
+    };
 }
 
 function createNippleActivatorControl(nippleActivatorControl: LayerNippleActivatorControl,
-    layers: Layers,
-    ci: CommandInterface,
-    gridConfig: GridConfiguration,
+                                      layers: Layers,
+                                      ci: CommandInterface,
+                                      gridConfig: GridConfiguration,
     // eslint-disable-next-line
     sensors: ControlSensors,
     // eslint-disable-next-line
@@ -578,7 +577,7 @@ function createNippleActivatorControl(nippleActivatorControl: LayerNippleActivat
         size: Math.max(columnWidth, rowHeight) * 1.5,
         position: {
             left: (width - right - left) / 2 + "px",
-            top: (height - bottom - top) / 2 + "px"
+            top: (height - bottom - top) / 2 + "px",
         },
     });
 
@@ -652,7 +651,7 @@ function createNippleActivatorControl(nippleActivatorControl: LayerNippleActivat
 
     const options = {
         capture: true,
-    }
+    };
 
     function onEnd(e: Event) {
         if (started) {
@@ -672,5 +671,5 @@ function createNippleActivatorControl(nippleActivatorControl: LayerNippleActivat
         for (const next of pointer.enders) {
             layers.mouseOverlay.removeEventListener(next, onEnd, options);
         }
-    }
+    };
 }

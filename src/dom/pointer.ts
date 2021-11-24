@@ -2,9 +2,9 @@ export const pointer = initBind();
 
 function initBind() {
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-    const isTouch = isMobile && !!('ontouchstart' in window);
+    const isTouch = isMobile && !!("ontouchstart" in window);
     const isPointer = isMobile && (window.PointerEvent ? true : false);
-    const isMSPointer = isMobile && (window.MSPointerEvent ? true : false);
+    const isMSPointer = isMobile && ((window as any).MSPointerEvent ? true : false);
     let canLock = !isMobile;
 
     const starters: string[] = [];
@@ -70,7 +70,7 @@ export function getPointerState(e: Event, el: HTMLElement): PointerState {
             y: evt.offsetY,
             mX: evt.movementX,
             mY: evt.movementY,
-        }
+        };
     } else {
         const evt = e as MouseEvent;
         return {
@@ -79,7 +79,7 @@ export function getPointerState(e: Event, el: HTMLElement): PointerState {
             mX: evt.movementX,
             mY: evt.movementY,
             button: evt.button === 0 ? 0 : 1,
-        }
+        };
     }
 }
 

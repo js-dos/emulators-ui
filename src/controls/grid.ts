@@ -43,15 +43,15 @@ function getSquareGrid(): Grid {
             const columnWidth = (width - columnsPadding * 2) / cols * scale;
             const rowHeight = (height - rowsPadding * 2) / rows * scale;
             const size = Math.min(columnWidth, rowHeight);
-            const cells: Cell[][] = []; 
+            const cells: Cell[][] = [];
             for (let row = 0; row < rows; ++row) {
                 const cellRow: Cell[] = [];
                 for (let col = 0; col < cols; ++col) {
                     cellRow.push({
-                        centerX:  col < middleCol ?
+                        centerX: col < middleCol ?
                             columnsPadding + size * (col + 1 / 2) :
                             width - columnsPadding - size * ((cols - col - 1) + 1 / 2),
-                        centerY: row < middleRow ? 
+                        centerY: row < middleRow ?
                             rowsPadding + size * (row + 1 / 2) :
                             height - rowsPadding - size * ((rows - row - 1) + 1 / 2),
                     });
@@ -106,7 +106,7 @@ function getHoneyCombGrid(): Grid {
                         centerX: col < middleCol ?
                             padding + columnsPadding + size * (col + 1 / 2):
                             padding + width - columnsPadding - size * ((cols - col - 1) + 1/2),
-                        centerY: row < middleRow ? 
+                        centerY: row < middleRow ?
                             rowsPadding + size * (row + 1 / 2) :
                             height - rowsPadding - size * ((rows - row - 1) + 1 / 2),
                     });
@@ -121,7 +121,7 @@ function getHoneyCombGrid(): Grid {
                 columnsPadding,
                 rowsPadding,
                 width,
-                height
+                height,
             };
         }
 

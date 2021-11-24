@@ -1,8 +1,8 @@
 import { MemStorage } from "./mem-storage";
 
-const MAX_VALUE_SIZE   = 1024
-const NEXT_PART_SYMBOL = "@"
-const NEXT_PART_SYFFIX = "."
+const MAX_VALUE_SIZE = 1024;
+const NEXT_PART_SYMBOL = "@";
+const NEXT_PART_SYFFIX = ".";
 
 export class LStorage implements Storage {
     private backend: Storage;
@@ -24,7 +24,7 @@ export class LStorage implements Storage {
         if (typeof this.backend.sync === "function") {
             (this as any).sync = (callback: any) => {
                 this.backend.sync(callback);
-            }
+            };
         }
     }
 
@@ -121,5 +121,4 @@ export class LStorage implements Storage {
     private readStringFromKey(key: string) {
         return this.backend.getItem(this.prefix + key);
     }
-
 }

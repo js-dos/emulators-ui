@@ -52,15 +52,16 @@ export function audioNode(ci: CommandInterface) {
 
     let audioContext: AudioContext | null = null;
 
-    if (typeof AudioContext !== 'undefined') {
+    if (typeof AudioContext !== "undefined") {
         audioContext = new AudioContext({
             sampleRate,
-            latencyHint: 'interactive',
+            latencyHint: "interactive",
         });
-    } else if (typeof (window as any).webkitAudioContext !== 'undefined') {
+    } else if (typeof (window as any).webkitAudioContext !== "undefined") {
+        // eslint-disable-next-line new-cap
         audioContext = new (window as any).webkitAudioContext({
             sampleRate,
-            latencyHint: 'interactive',
+            latencyHint: "interactive",
         });
     }
 
@@ -102,14 +103,14 @@ export function audioNode(ci: CommandInterface) {
     audioNode.connect(audioContext.destination);
 
     const resumeWebAudio = () => {
-        if (audioContext !== null && audioContext.state === 'suspended') {
+        if (audioContext !== null && audioContext.state === "suspended") {
             audioContext.resume();
         }
     };
 
-    document.addEventListener('click', resumeWebAudio, {once:true});
-    document.addEventListener('touchstart', resumeWebAudio, {once:true});
-    document.addEventListener('keydown', resumeWebAudio, {once:true});
+    document.addEventListener("click", resumeWebAudio, { once: true });
+    document.addEventListener("touchstart", resumeWebAudio, { once: true });
+    document.addEventListener("keydown", resumeWebAudio, { once: true });
 
     ci.events().onExit(() => {
         if (audioContext !== null) {
@@ -117,8 +118,8 @@ export function audioNode(ci: CommandInterface) {
             audioContext.close();
         }
 
-        document.removeEventListener('click', resumeWebAudio);
-        document.removeEventListener('touchstart', resumeWebAudio);
-        document.removeEventListener('keydown', resumeWebAudio);
+        document.removeEventListener("click", resumeWebAudio);
+        document.removeEventListener("touchstart", resumeWebAudio);
+        document.removeEventListener("keydown", resumeWebAudio);
     });
 }

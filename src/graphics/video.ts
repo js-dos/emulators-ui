@@ -7,7 +7,7 @@ export function video(layers: Layers, ci: CommandInterface) {
 
     ci.events().onMessage((msgType: JanusMessageType | string, stream: MediaStream) => {
         if (msgType === "onremotestream") {
-						(window as any).Janus.attachMediaStream(layers.video, stream);
+            (window as any).Janus.attachMediaStream(layers.video, stream);
         }
     });
 }

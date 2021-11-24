@@ -35,7 +35,7 @@ export function _2d(layers: Layers, ci: CommandInterface) {
         containerWidth = w;
         containerHeight = h;
         onResize();
-    }
+    };
     layers.addOnResize(onResizeLayer);
 
     let rgba = new Uint8ClampedArray(0);
@@ -50,7 +50,7 @@ export function _2d(layers: Layers, ci: CommandInterface) {
     ci.events().onFrameSize(onResizeFrame);
     ci.events().onFrame((rgb) => {
         let rgbOffset = 0;
-        let rgbaOffset = 0
+        let rgbaOffset = 0;
 
         while (rgbaOffset < rgba.length) {
             rgba[rgbaOffset++] = rgb[rgbOffset++];

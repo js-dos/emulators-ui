@@ -1,21 +1,20 @@
 // eslint-disable-next-line
 
-import { blue, bold, red, yellow } from "colors";
 import * as process from "process";
 
 export function log(first?: any, ...args: any[]) {
-    console.log.apply(null, ["[" + blue("INFO") + "]", first, ...args]);
+    console.log.apply(null, ["[INFO]", first, ...args]);
 }
 
 export function warn(first?: any, ...args: any[]) {
-    console.log.apply(null, ["[" + yellow("WARN") + "]", first, ...args]);
+    console.log.apply(null, ["[WARN]", first, ...args]);
 }
 
 export function error(first?: any, ...args: any[]) {
-    console.log.apply(null, ["[" + red("ERROR") + "]", first, ...args]);
+    console.log.apply(null, ["[ERROR]", first, ...args]);
 }
 
 export function fatal(first?: any, ...args: any[]) {
-    console.log.apply(null, ["[" + bold(red("FATAL")) + "]", first, ...args]);
+    console.log.apply(null, ["[FATAL]", first, ...args]);
     process.exit(1);
 }

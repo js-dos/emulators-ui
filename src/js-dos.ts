@@ -65,38 +65,38 @@ export class DosInstance {
         this.createTransportLayer = options.createTransportLayer;
         this.mobileControls = pointers.bind.mobile;
         this.autolock = false;
-        
+
         this.mirroredControls = this.storage.getItem("mirroredControls") === "true";
-        
+
         const scaleControlsValue = Number.parseFloat(this.storage.getItem("scaleControls") ?? "1.0");
         this.scaleControls = Number.isNaN(scaleControlsValue) ? 1.0 : scaleControlsValue;
 
         const sensitivityValue = Number.parseFloat(this.storage.getItem("sensitivity") ?? "1.0");
         this.sensitivity = Number.isNaN(sensitivityValue) ? 1.0 : sensitivityValue;
-        
-        this.onMobileControlsChanged = () => { /**/ };
+
+        this.onMobileControlsChanged = () => {/**/};
 
         if (this.emulatorFunction === "backend" && this.createTransportLayer === undefined) {
             throw new Error("Emulator function set to 'backend' but 'createTransportLayer' is not a function");
         }
     }
 
-    async run(bundleUrl: string, 
+    async run(bundleUrl: string,
         optionalChangesUrl?: string,
         optionalPersistKey?: string): Promise<CommandInterface> {
         await this.stop();
         this.layers.setLoadingMessage("Starting...");
 
-        const persistKey = optionalPersistKey !== undefined && optionalPersistKey !== null && optionalPersistKey.length > 0 ?
-            optionalPersistKey :
-            bundleUrl + ".changes";
+        const persistKey = (optionalPersistKey !== undefined &&
+            optionalPersistKey !== null && optionalPersistKey.length > 0) ?
+            optionalPersistKey : bundleUrl + ".changes";
 
         let ci: CommandInterface;
         try {
             ci = await this.runBundle(bundleUrl, optionalChangesUrl, persistKey);
         } catch (e) {
             this.layers.setLoadingMessage("Unexpected error occured...");
-            this.layers.notyf.error({ message: "Can't start emulator look browser logs for more info"});
+            this.layers.notyf.error({ message: "Can't start emulator look browser logs for more info" });
             // eslint-disable-next-line
             console.error(e);
             throw e;
@@ -124,7 +124,7 @@ export class DosInstance {
 
         const config = await ci.config();
         this.autolock = config.output?.options?.autolock?.value === true;
-        await this.setLayersConfig(extractLayersConfig(config))
+        await this.setLayersConfig(extractLayersConfig(config));
 
         if (!this.mobileControls) {
             this.mobileControls = true; // force disabling
@@ -170,7 +170,8 @@ export class DosInstance {
         } else if (config.version === undefined) {
             this.unbindControls = initLegacyLayersControl(this, this.layers, config as LegacyLayersConfig, ci);
         } else {
-            this.unbindControls = initLayersControl(this.layers, config as LayersConfig, ci, this, this.mirroredControls, this.scaleControls, layerName);
+            this.unbindControls = initLayersControl(this.layers, config as LayersConfig,
+                ci, this, this.mirroredControls, this.scaleControls, layerName);
         }
     }
 
@@ -270,14 +271,16 @@ export class DosInstance {
                 }
                 const bundle = await bundlePromise;
                 if (this.emulatorFunction === "backend") {
-                    this.ciPromise = emulators.backend([bundle, changesBundle], (this as any).createTransportLayer() as TransportLayer);
+                    this.ciPromise = emulators.backend([bundle, changesBundle],
+                        (this as any).createTransportLayer() as TransportLayer);
                 } else {
                     this.ciPromise = emulators[this.emulatorFunction]([bundle, changesBundle]);
                 }
             } catch {
                 const bundle = await bundlePromise;
                 if (this.emulatorFunction === "backend") {
-                    this.ciPromise = emulators.backend([bundle], (this as any).createTransportLayer() as TransportLayer);
+                    this.ciPromise = emulators.backend([bundle],
+                        (this as any).createTransportLayer() as TransportLayer);
                 } else {
                     this.ciPromise = emulators[this.emulatorFunction]([bundle]);
                 }

@@ -48,7 +48,8 @@ export function createButton(symbol: string,
     const button = createDiv("emulator-button-touch-zone") as HTMLJsDosButtonElement;
     const innerButton = createDiv("emulator-button");
     const innerText = createDiv("emulator-button-text",
-                                backgroundImage === undefined ? ((text === undefined || text.length === 0) ? "□" : text.substr(0, 1).toUpperCase()) : "");
+        backgroundImage === undefined ? ((text === undefined || text.length === 0) ?
+            "□" : text.substr(0, 1).toUpperCase()) : "");
 
     if (backgroundImage !== undefined) {
         innerButton.style.backgroundImage = "url(\"" + backgroundImage + "\")";
@@ -88,7 +89,7 @@ export function createButton(symbol: string,
     };
     const options = {
         capture: true,
-    }
+    };
     for (const next of pointer.starters) {
         button.addEventListener(next, onStart, options);
     }
@@ -108,9 +109,9 @@ export function createButton(symbol: string,
 }
 
 export function deprecatedButton(layers: Layers,
-                       ci: CommandInterface,
-                       buttons: Button[],
-                       size: number) {
+                                 ci: CommandInterface,
+                                 buttons: Button[],
+                                 size: number) {
     const ident = Math.round(size / 4);
     const toRemove: HTMLElement[] = [];
 
@@ -184,15 +185,16 @@ function mapToSymbol(mapTo: Binding): string {
 }
 
 function deprecatedCreateHandler(button: Button,
-                       layers: Layers): ButtonHandler {
-        return button.action === "click" ?
-            { onClick: () => layers.fireKeyPress(button.mapTo) } :
-            {
-                onDown: () => layers.fireKeyDown(button.mapTo),
-                onUp: () => layers.fireKeyUp(button.mapTo)
-            };
+                                 layers: Layers): ButtonHandler {
+    return button.action === "click" ?
+        { onClick: () => layers.fireKeyPress(button.mapTo) } :
+        {
+            onDown: () => layers.fireKeyDown(button.mapTo),
+            onUp: () => layers.fireKeyUp(button.mapTo),
+        };
 }
 
+/* eslint-disable max-len */
 const down = "data:image/svg+xml,%3C%3Fxml version='1.0' encoding='utf-8'%3F%3E%3C!-- Generator: Adobe Illustrator 17.1.0, SVG Export Plug-In . SVG Version: 6.00 Build 0) --%3E%3C!DOCTYPE svg PUBLIC '-//W3C//DTD SVG 1.1//EN' 'http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd'%3E%3Csvg version='1.1' id='Layer_1' xmlns:sketch='http://www.bohemiancoding.com/sketch/ns' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' viewBox='0 0 20 20' fill='%23FFF' enable-background='new 0 0 20 20' xml:space='preserve'%3E%3Ctitle%3EShape%3C/title%3E%3Cdesc%3ECreated with Sketch.%3C/desc%3E%3Cg id='Page-1' sketch:type='MSPage'%3E%3Cg id='Artboard-1' transform='translate(-3.000000, -1.000000)' sketch:type='MSArtboardGroup'%3E%3Cpath id='Shape' sketch:type='MSShapeGroup' d='M19,12c-0.3,0-0.5,0.1-0.7,0.3L14,16.6V3c0-0.5-0.4-1-1-1s-1,0.5-1,1v13.6 l-4.3-4.3C7.5,12.1,7.3,12,7,12c-0.5,0-1,0.4-1,1c0,0.3,0.1,0.5,0.3,0.7l6,6c0.2,0.2,0.4,0.3,0.7,0.3s0.5-0.1,0.7-0.3l6-6 c0.2-0.2,0.3-0.4,0.3-0.7C20,12.4,19.5,12,19,12L19,12z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E";
 const left = "data:image/svg+xml,%3C%3Fxml version='1.0' encoding='utf-8'%3F%3E%3C!-- Generator: Adobe Illustrator 17.1.0, SVG Export Plug-In . SVG Version: 6.00 Build 0) --%3E%3C!DOCTYPE svg PUBLIC '-//W3C//DTD SVG 1.1//EN' 'http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd'%3E%3Csvg version='1.1' id='Layer_1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' viewBox='0 0 20 20' enable-background='new 0 0 20 20' fill='%23FFF' xml:space='preserve'%3E%3Cg id='left_arrow_1_'%3E%3Cg%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M18,9H4.41l4.29-4.29C8.89,4.53,9,4.28,9,4c0-0.55-0.45-1-1-1 C7.72,3,7.47,3.11,7.29,3.29l-6,6C1.11,9.47,1,9.72,1,10c0,0.28,0.11,0.53,0.29,0.71l6,6C7.47,16.89,7.72,17,8,17 c0.55,0,1-0.45,1-1c0-0.28-0.11-0.53-0.29-0.71L4.41,11H18c0.55,0,1-0.45,1-1C19,9.45,18.55,9,18,9z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E";
 const right = "data:image/svg+xml,%3C%3Fxml version='1.0' encoding='utf-8'%3F%3E%3C!-- Generator: Adobe Illustrator 17.1.0, SVG Export Plug-In . SVG Version: 6.00 Build 0) --%3E%3C!DOCTYPE svg PUBLIC '-//W3C//DTD SVG 1.1//EN' 'http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd'%3E%3Csvg version='1.1' id='Layer_1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' fill='%23fff' viewBox='0 0 20 20' enable-background='new 0 0 20 20' xml:space='preserve'%3E%3Cg id='right_arrow_1_'%3E%3Cg%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M18.71,9.29l-6-6C12.53,3.11,12.28,3,12,3c-0.55,0-1,0.45-1,1 c0,0.28,0.11,0.53,0.29,0.71L15.59,9H2c-0.55,0-1,0.45-1,1c0,0.55,0.45,1,1,1h13.59l-4.29,4.29C11.11,15.47,11,15.72,11,16 c0,0.55,0.45,1,1,1c0.28,0,0.53-0.11,0.71-0.29l6-6C18.89,10.53,19,10.28,19,10C19,9.72,18.89,9.47,18.71,9.29z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E";
@@ -219,5 +221,5 @@ const symbolToUrl: {[symbol: string]: string} = {
     enr: enter,
     ent: enter,
     entr: enter,
-}
+};
 

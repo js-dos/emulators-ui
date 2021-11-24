@@ -54,7 +54,7 @@ export class EmulatorsUi {
         keyboard, // default keyboard processor
         mouse, // default mouse processor
         nipple, // multitouch control for emulating keyboard on mobiles
-        options // default options control (fullscreen, save, etc.)
+        options, // default options control (fullscreen, save, etc.)
     };
 
     notifications = {
@@ -63,7 +63,7 @@ export class EmulatorsUi {
 
     // default player
     dos: DosFactoryType = (root: HTMLDivElement, options?: DosOptions) => {
-        return new DosInstance(root, this, options || {});
+        return new DosInstance(root, impl, options || {});
     };
 }
 

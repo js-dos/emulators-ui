@@ -9,7 +9,6 @@ export function initNullLayersControl(
     dosInstance: DosInstance,
     layers: Layers,
     ci: CommandInterface) {
-
     const unbindKeyboard = keyboard(layers, ci);
     const unbindMouse = mouse(dosInstance.autolock, dosInstance.sensitivity, layers, ci);
     const unbindOptions =

@@ -3,7 +3,6 @@ import { Layers } from "../../dom/layers";
 import { mount } from "./mouse-common";
 
 export function mouseLocked(sensitivity: number, layers: Layers, ci: CommandInterface) {
-
     const el = layers.mouseOverlay;
 
     function isNotLocked() {

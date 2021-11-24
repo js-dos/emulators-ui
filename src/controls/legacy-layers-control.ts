@@ -49,7 +49,7 @@ export function initLegacyLayersControl(
         if (layer.buttons !== undefined && layer.buttons.length) {
             unbind.buttons = deprecatedButton(layers, ci, layer.buttons, 54);
         }
-    }
+    };
 
 
     const unbindOptions =

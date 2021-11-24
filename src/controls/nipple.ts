@@ -31,14 +31,14 @@ export function nipple(layers: Layers,
     const press = (keyCode: number) => {
         layers.fireKeyDown(keyCode);
         pressed = keyCode;
-    }
+    };
 
     const release = () => {
         if (pressed !== -1) {
             layers.fireKeyUp(pressed);
             pressed = -1;
         }
-    }
+    };
 
     const releaseOnEnd: {[index: number]: boolean} = {};
     const tapJoysticks: {[index: number]: number} = {};

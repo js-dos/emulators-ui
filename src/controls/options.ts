@@ -53,7 +53,7 @@ export function options(layers: Layers,
                 if (controlsVisbile) {
                     toggleOptions();
                 }
-            }
+            },
         }, size),
         createButton("fullscreen", {
             onClick: () => {
@@ -66,7 +66,7 @@ export function options(layers: Layers,
         }, size),
         createButton("options", {
             onClick: toggleOptions,
-        }, size)
+        }, size),
     ];
     const options = children[children.length - 1];
     const fullscreen = children[children.length - 2].children[0];

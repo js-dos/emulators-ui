@@ -1,3 +1,5 @@
+/* eslint-disable camelcase */
+
 export const KBD_NONE = 0;
 export const KBD_0 = 48;
 export const KBD_1 = 49;
@@ -207,7 +209,7 @@ export const domToKeyCodes: {[index: number]: number} = {
     221: KBD_rightbracket,
     // 222: KBD_apostrophe,
     // 224: KBD_left_super,
-}
+};
 
 export const namedKeyCodes: {[name: string]: number} = {
     "KBD_NONE": KBD_NONE,

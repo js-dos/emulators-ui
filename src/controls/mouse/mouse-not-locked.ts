@@ -4,7 +4,6 @@ import { Layers } from "../../dom/layers";
 import { mapXY as doMapXY, mount } from "./mouse-common";
 
 export function mouseNotLocked(layers: Layers, ci: CommandInterface) {
-
     const el = layers.mouseOverlay;
     const mapXY = (x: number, y: number) => doMapXY(x, y, ci, layers);
 

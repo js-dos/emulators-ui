@@ -32,9 +32,9 @@ export function webGl(layers: Layers, ci: CommandInterface) {
     }
 
     const shaderProgram = initShaderProgram(gl, vsSource, fsSource);
-    const vertexPosition = gl.getAttribLocation(shaderProgram, 'aVertexPosition');
-    const textureCoord = gl.getAttribLocation(shaderProgram, 'aTextureCoord');
-    const uSampler = gl.getUniformLocation(shaderProgram, 'uSampler');
+    const vertexPosition = gl.getAttribLocation(shaderProgram, "aVertexPosition");
+    const textureCoord = gl.getAttribLocation(shaderProgram, "aTextureCoord");
+    const uSampler = gl.getUniformLocation(shaderProgram, "uSampler");
 
     initBuffers(gl, vertexPosition, textureCoord);
 
@@ -47,8 +47,8 @@ export function webGl(layers: Layers, ci: CommandInterface) {
 
     const pixel = new Uint8Array([0, 0, 0]);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB,
-                  1, 1, 0, gl.RGB, gl.UNSIGNED_BYTE,
-                  pixel);
+        1, 1, 0, gl.RGB, gl.UNSIGNED_BYTE,
+        pixel);
 
     gl.useProgram(shaderProgram);
     gl.activeTexture(gl.TEXTURE0);
@@ -81,7 +81,7 @@ export function webGl(layers: Layers, ci: CommandInterface) {
         containerWidth = w;
         containerHeight = h;
         onResize();
-    }
+    };
     layers.addOnResize(onResizeLayer);
 
     const onResizeFrame = (w: number, h: number) => {
@@ -95,8 +95,8 @@ export function webGl(layers: Layers, ci: CommandInterface) {
     ci.events().onFrameSize(onResizeFrame);
     ci.events().onFrame((rgb) => {
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB,
-                      frameWidth, frameHeight, 0, gl.RGB, gl.UNSIGNED_BYTE,
-                      rgb);
+            frameWidth, frameHeight, 0, gl.RGB, gl.UNSIGNED_BYTE,
+            rgb);
         gl.drawArrays(gl.TRIANGLES, 0, 6);
     });
 
@@ -108,62 +108,62 @@ export function webGl(layers: Layers, ci: CommandInterface) {
 }
 
 function initShaderProgram(gl: WebGLRenderingContext, vsSource: string, fsSource: string) {
-  const vertexShader = loadShader(gl, gl.VERTEX_SHADER, vsSource);
-  const fragmentShader = loadShader(gl, gl.FRAGMENT_SHADER, fsSource);
+    const vertexShader = loadShader(gl, gl.VERTEX_SHADER, vsSource);
+    const fragmentShader = loadShader(gl, gl.FRAGMENT_SHADER, fsSource);
 
-  const shaderProgram = gl.createProgram() as WebGLShader;
-  gl.attachShader(shaderProgram, vertexShader);
-  gl.attachShader(shaderProgram, fragmentShader);
-  gl.linkProgram(shaderProgram);
+    const shaderProgram = gl.createProgram() as WebGLShader;
+    gl.attachShader(shaderProgram, vertexShader);
+    gl.attachShader(shaderProgram, fragmentShader);
+    gl.linkProgram(shaderProgram);
 
-  if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
-    throw new Error('Unable to initialize the shader program: ' + gl.getProgramInfoLog(shaderProgram));
-  }
+    if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
+        throw new Error("Unable to initialize the shader program: " + gl.getProgramInfoLog(shaderProgram));
+    }
 
-  return shaderProgram;
+    return shaderProgram;
 }
 
 function loadShader(gl: WebGLRenderingContext, shaderType: GLenum, source: string) {
-  const shader = gl.createShader(shaderType) as WebGLShader;
-  gl.shaderSource(shader, source);
-  gl.compileShader(shader);
-  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-      const info = gl.getShaderInfoLog(shader);
-      gl.deleteShader(shader);
-      throw new Error('An error occurred compiling the shaders: ' + info);
-  }
+    const shader = gl.createShader(shaderType) as WebGLShader;
+    gl.shaderSource(shader, source);
+    gl.compileShader(shader);
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+        const info = gl.getShaderInfoLog(shader);
+        gl.deleteShader(shader);
+        throw new Error("An error occurred compiling the shaders: " + info);
+    }
 
-  return shader;
+    return shader;
 }
 
 function initBuffers(gl: WebGLRenderingContext, vertexPosition: number, textureCoord: number) {
-  const positionBuffer = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-  const positions = [
-    -1.0, -1.0,  0.0,
-     1.0, -1.0,  0.0,
-     1.0,  1.0,  0.0,
-    -1.0, -1.0,  0.0,
-     1.0,  1.0,  0.0,
-    -1.0,  1.0,  0.0,
-  ];
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
-  gl.vertexAttribPointer(vertexPosition, 3, gl.FLOAT, false, 0, 0);
-  gl.enableVertexAttribArray(vertexPosition);
+    const positionBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+    const positions = [
+        -1.0, -1.0, 0.0,
+        1.0, -1.0, 0.0,
+        1.0, 1.0, 0.0,
+        -1.0, -1.0, 0.0,
+        1.0, 1.0, 0.0,
+        -1.0, 1.0, 0.0,
+    ];
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
+    gl.vertexAttribPointer(vertexPosition, 3, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(vertexPosition);
 
-  const textureCoordBuffer = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, textureCoordBuffer);
-  const textureCoordinates = [
-    0.0,  1.0,
-    1.0,  1.0,
-    1.0,  0.0,
-    0.0,  1.0,
-    1.0,  0.0,
-    0.0,  0.0,
-  ];
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(textureCoordinates),
-                gl.STATIC_DRAW);
+    const textureCoordBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, textureCoordBuffer);
+    const textureCoordinates = [
+        0.0, 1.0,
+        1.0, 1.0,
+        1.0, 0.0,
+        0.0, 1.0,
+        1.0, 0.0,
+        0.0, 0.0,
+    ];
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(textureCoordinates),
+        gl.STATIC_DRAW);
 
-  gl.vertexAttribPointer(textureCoord, 2, gl.FLOAT, false, 0, 0);
-  gl.enableVertexAttribArray(textureCoord);
+    gl.vertexAttribPointer(textureCoord, 2, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(textureCoord);
 }

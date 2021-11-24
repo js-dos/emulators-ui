@@ -22,7 +22,7 @@ export async function resolveBundle(url: string,
         if (onprogress !== undefined) {
             onprogress(100);
         }
-        return new Uint8Array(buffer)
+        return new Uint8Array(buffer);
     } catch {
         return new Promise<Uint8Array>((resolve, reject) => {
             const request = new XMLHttpRequest();
@@ -53,7 +53,7 @@ export async function resolveBundle(url: string,
                         const porgress = Math.round(event.loaded * 10000 / event.total) / 100;
                         onprogress(porgress);
                     }
-                }
+                };
             }
             if (httpCache === false) {
                 request.setRequestHeader("Cache-Control", "no-cache, no-store, max-age=0");

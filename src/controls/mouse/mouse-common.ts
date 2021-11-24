@@ -8,7 +8,7 @@ import { mouseLocked } from "./mouse-locked";
 const insensitivePadding = 1 / 100;
 
 export function mapXY(eX: number, eY: number,
-    ci: CommandInterface, layers: Layers) {
+                      ci: CommandInterface, layers: Layers) {
     const frameWidth = ci.width();
     const frameHeight = ci.height();
     const containerWidth = layers.width;
@@ -53,11 +53,10 @@ export function mapXY(eX: number, eY: number,
 }
 
 export function mount(el: HTMLDivElement, layers: Layers,
-    onMouseDown: (x: number, y: number, button: number) => void,
-    onMouseMove: (x: number, y: number, mX: number, mY: number) => void,
-    onMouseUp: (x: number,y: number, button: number) => void,
-    onMouseLeave: (x: number, y: number) => void) {
-
+                      onMouseDown: (x: number, y: number, button: number) => void,
+                      onMouseMove: (x: number, y: number, mX: number, mY: number) => void,
+                      onMouseUp: (x: number, y: number, button: number) => void,
+                      onMouseLeave: (x: number, y: number) => void) {
     // eslint-disable-next-line
     function preventDefaultIfNeeded(e: Event) {
         // not needed yet
@@ -137,7 +136,7 @@ export function mount(el: HTMLDivElement, layers: Layers,
 
     const options = {
         capture: false,
-    }
+    };
 
     for (const next of pointer.starters) {
         el.addEventListener(next, onStart, options);
