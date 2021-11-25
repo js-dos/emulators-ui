@@ -1,7 +1,7 @@
 import { CommandInterface } from "emulators";
 import { Layers } from "../../dom/layers";
 import { pointer, getPointerState } from "../../dom/pointer";
-import { mouseNipple } from "./mouse-nipple";
+import { mouseSwipe } from "./mouse-swipe";
 import { mouseNotLocked } from "./mouse-not-locked";
 import { mouseLocked } from "./mouse-locked";
 
@@ -175,7 +175,7 @@ export function mount(el: HTMLDivElement, layers: Layers,
 
 export function mouse(autolock: boolean, sensitivity: number, layers: Layers, ci: CommandInterface) {
     if (autolock && !pointer.canLock) {
-        return mouseNipple(sensitivity, layers, ci);
+        return mouseSwipe(sensitivity, layers, ci);
     }
 
     if (autolock) {
