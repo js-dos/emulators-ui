@@ -31,7 +31,7 @@ function copyCss() {
 }
 
 function copyAssets() {
-    return src("src/emulators-ui-loader.gif")
+    return src("src/emulators-ui-loader.png")
         .pipe(dest("dist"));
 }
 
