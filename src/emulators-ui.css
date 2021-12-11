@@ -209,7 +209,7 @@
 }
 
 .emulator-options {
-    justify-content: end;
+    justify-content: flex-end;
     flex-wrap: wrap-reverse;
     display: flex;
     flex-direction: row;
