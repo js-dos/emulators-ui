@@ -36,6 +36,10 @@ export function mouseLocked(sensitivity: number, layers: Layers, ci: CommandInte
             return;
         }
 
+        if (mX === 0 && mY === 0) {
+            return;
+        }
+
         (ci as any).sendMouseRelativeMotion(mX * sensitivity, mY * sensitivity);
     }
 

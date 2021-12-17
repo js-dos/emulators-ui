@@ -33,6 +33,9 @@ export function mouseSwipe(sensitivity: number, layers: Layers, ci: CommandInter
         }
     };
 
+    let prevX = 0;
+    let prevY = 0;
+
     const onMouseDown = (x: number, y: number) => {
         removeRepeat();
 
@@ -40,10 +43,27 @@ export function mouseSwipe(sensitivity: number, layers: Layers, ci: CommandInter
         accX = 0;
         accY = 0;
         acc = 0;
+        prevX = x;
+        prevY = y;
     };
 
     function onMouseMove(x: number, y: number, mX: number, mY: number) {
         removeRepeat();
+
+        if (mX === undefined) {
+            mX = x - prevX;
+        }
+
+        if (mY === undefined) {
+            mY = y - prevY;
+        }
+
+        prevX = x;
+        prevY = y;
+
+        if (mX === 0 && mY === 0) {
+            return;
+        }
 
         accX += mX;
         accY += mY;
