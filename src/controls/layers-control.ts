@@ -217,8 +217,16 @@ function createKeyControl(keyControl: LayerKeyControl,
     const { centerX, centerY } = cells[row][column];
 
     const handler = {
-        onDown: () => ci.sendKeyEvent(keyControl.mapTo, true),
-        onUp: () => ci.sendKeyEvent(keyControl.mapTo, false),
+        onDown: () => {
+            for (const next of keyControl.mapTo) {
+                ci.sendKeyEvent(next, true);
+            }
+        },
+        onUp: () => {
+            for (const next of keyControl.mapTo) {
+                ci.sendKeyEvent(next, false);
+            }
+        },
     };
     const button = createButton(keyControl.symbol, handler, columnWidth);
 

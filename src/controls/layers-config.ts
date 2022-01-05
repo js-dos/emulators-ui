@@ -17,7 +17,7 @@ export interface LayerControl extends LayerPosition {
 }
 
 export interface LayerKeyControl extends LayerControl {
-    mapTo: number;
+    mapTo: number[];
 }
 
 export interface LayerSwitchControl extends LayerControl {
@@ -79,8 +79,25 @@ export function extractLayersConfig(config: any): LayersConfig | LegacyLayersCon
     }
 
     if (config.layers !== undefined) {
+        if (config.layers.version === 1) {
+            migrateV1ToV2(config);
+        }
+
         return config.layers;
     }
 
     return null;
+}
+
+function migrateV1ToV2(config: LayersConfig) {
+    for (const layer of config.layers) {
+        for (const control of layer.controls) {
+            if (control.type === "Key") {
+                const keyControl = control as LayerKeyControl;
+                if (typeof keyControl.mapTo === "number") {
+                    keyControl.mapTo = [keyControl.mapTo];
+                }
+            }
+        }
+    }
 }
