@@ -6,7 +6,7 @@ import {
     LayerPointerButtonControl, LayerPointerMoveControl, LayerPointerResetControl,
     LayerPointerToggleControl, LayerNippleActivatorControl,
 } from "./layers-config";
-import { getGrid, GridConfiguration } from "./grid";
+import { Cell, getGrid, GridConfiguration } from "./grid";
 import { createButton } from "./button";
 import { DosInstance } from "../js-dos";
 import { keyboard } from "./keyboard";
@@ -35,6 +35,10 @@ export function initLayersControl(
         }
     }
     return initLayerConfig(selectedLayer, layers, ci, dosInstance, mirrored, scale);
+}
+
+interface CellWithMeta extends Cell {
+    hidden?: boolean,
 }
 
 interface Sensor {
@@ -101,7 +105,7 @@ function initLayerConfig(layerConfig: LayerConfig,
     const unbindMouse = mouse(dosInstance.autolock, dosInstance.sensitivity, layers, ci);
 
     const unbindControls: (() => void)[] = [];
-    function onResize(width: number, height: number) {
+    function rebuild(width: number, height: number) {
         for (const next of unbindControls) {
             next();
         }
@@ -110,6 +114,13 @@ function initLayerConfig(layerConfig: LayerConfig,
         const grid = getGrid(layerConfig.grid);
         const gridConfig = grid.getConfiguration(width, height, scale);
         const sensors = new ControlSensors();
+
+        for (const next of layerConfig.controls) {
+            const { row, column, type } = next;
+            if (type === "NippleActivator") {
+                setHiddenAround(gridConfig, row, column);
+            }
+        }
 
         let doOffsetColumnInRow = -1;
         if (layers.options.optionControls?.length === 0) {
@@ -192,11 +203,11 @@ function initLayerConfig(layerConfig: LayerConfig,
         }
     }
 
-    layers.addOnResize(onResize);
-    onResize(layers.width, layers.height);
+    layers.addOnResize(rebuild);
+    rebuild(layers.width, layers.height);
 
     return () => {
-        layers.removeOnResize(onResize);
+        layers.removeOnResize(rebuild);
         unbindKeyboard();
         unbindMouse();
         for (const next of unbindControls) {
@@ -210,8 +221,7 @@ function createKeyControl(keyControl: LayerKeyControl,
                           ci: CommandInterface,
                           gridConfig: GridConfiguration,
                           sensors: ControlSensors,
-    // eslint-disable-next-line
-    dosInstance: DosInstance) {
+                          dosInstance: DosInstance) {
     const { cells, columnWidth } = gridConfig;
     const { row, column } = keyControl;
     const { centerX, centerY } = cells[row][column];
@@ -228,16 +238,21 @@ function createKeyControl(keyControl: LayerKeyControl,
             }
         },
     };
-    const button = createButton(keyControl.symbol, handler, columnWidth);
-
-    button.style.position = "absolute";
-    button.style.left = (centerX - button.widthPx / 2) + "px";
-    button.style.top = (centerY - button.heightPx / 2) + "px";
 
     sensors.register(row, column, {
         activate: handler.onDown,
         deactivate: handler.onUp,
     });
+
+    if (isHidden(gridConfig, row, column)) {
+        return () => {};
+    }
+
+    const button = createButton(keyControl.symbol, handler, columnWidth);
+
+    button.style.position = "absolute";
+    button.style.left = (centerX - button.widthPx / 2) + "px";
+    button.style.top = (centerY - button.heightPx / 2) + "px";
 
     layers.mouseOverlay.appendChild(button);
     return () => layers.mouseOverlay.removeChild(button);
@@ -247,11 +262,8 @@ function createOptionsControl(optionControl: LayerControl,
                               layers: Layers,
                               ci: CommandInterface,
                               gridConfig: GridConfiguration,
-    // eslint-disable-next-line
-    sensors: ControlSensors,
-    // eslint-disable-next-line
-    dosInstance: DosInstance) {
-
+                              sensors: ControlSensors,
+                              dosInstance: DosInstance) {
     if (layers.options.optionControls?.length === 0) {
         return () => {/**/};
     }
@@ -280,10 +292,8 @@ function createKeyboardControl(keyboardControl: LayerControl,
                                layers: Layers,
                                ci: CommandInterface,
                                gridConfig: GridConfiguration,
-    // eslint-disable-next-line
-    sensors: ControlSensors,
-    // eslint-disable-next-line
-    dosInstance: DosInstance) {
+                               sensors: ControlSensors,
+                               dosInstance: DosInstance) {
     const { cells, columnWidth } = gridConfig;
     const { row, column } = keyboardControl;
     const { centerX, centerY } = cells[row][column];
@@ -316,8 +326,7 @@ function createSwitchControl(switchControl: LayerSwitchControl,
                              layers: Layers,
                              ci: CommandInterface,
                              gridConfig: GridConfiguration,
-    // eslint-disable-next-line
-    sensors: ControlSensors,
+                             sensors: ControlSensors,
                              dosInstance: DosInstance) {
     const { cells, columnWidth } = gridConfig;
     const { row, column } = switchControl;
@@ -342,8 +351,7 @@ function createScreenMoveControl(screenMoveControl: LayerScreenMoveControl,
                                  ci: CommandInterface,
                                  gridConfig: GridConfiguration,
                                  sensors: ControlSensors,
-    // eslint-disable-next-line
-    dosInstance: DosInstance) {
+                                 dosInstance: DosInstance) {
     const { cells, columnWidth } = gridConfig;
     const { row, column } = screenMoveControl;
     const { centerX, centerY } = cells[row][column];
@@ -375,21 +383,24 @@ function createScreenMoveControl(screenMoveControl: LayerScreenMoveControl,
             ci.sendMouseMotion(0.5, 0.5);
         },
     };
-    const button = createButton(screenMoveControl.symbol, handler, columnWidth);
-
-    button.style.position = "absolute";
-    button.style.left = (centerX - button.widthPx / 2) + "px";
-    button.style.top = (centerY - button.heightPx / 2) + "px";
 
     sensors.register(row, column, {
         activate: handler.onDown,
         deactivate: handler.onUp,
     });
 
+    if (isHidden(gridConfig, row, column)) {
+        return () => {};
+    }
+
+    const button = createButton(screenMoveControl.symbol, handler, columnWidth);
+
+    button.style.position = "absolute";
+    button.style.left = (centerX - button.widthPx / 2) + "px";
+    button.style.top = (centerY - button.heightPx / 2) + "px";
+
     layers.mouseOverlay.appendChild(button);
-    return () => {
-        layers.mouseOverlay.removeChild(button);
-    };
+    return () => layers.mouseOverlay.removeChild(button);
 }
 
 function createPointerButtonControl(pointerButtonControl: LayerPointerButtonControl,
@@ -397,8 +408,7 @@ function createPointerButtonControl(pointerButtonControl: LayerPointerButtonCont
                                     ci: CommandInterface,
                                     gridConfig: GridConfiguration,
                                     sensors: ControlSensors,
-    // eslint-disable-next-line
-    dosInstance: DosInstance) {
+                                    dosInstance: DosInstance) {
     const { cells, columnWidth } = gridConfig;
     const { row, column, click } = pointerButtonControl;
     const { centerX, centerY } = cells[row][column];
@@ -419,21 +429,24 @@ function createPointerButtonControl(pointerButtonControl: LayerPointerButtonCont
             }
         },
     };
-    const button = createButton(pointerButtonControl.symbol, handler, columnWidth);
-
-    button.style.position = "absolute";
-    button.style.left = (centerX - button.widthPx / 2) + "px";
-    button.style.top = (centerY - button.heightPx / 2) + "px";
 
     sensors.register(row, column, {
         activate: handler.onDown,
         deactivate: handler.onUp,
     });
 
+    if (isHidden(gridConfig, row, column)) {
+        return () => {};
+    }
+
+    const button = createButton(pointerButtonControl.symbol, handler, columnWidth);
+
+    button.style.position = "absolute";
+    button.style.left = (centerX - button.widthPx / 2) + "px";
+    button.style.top = (centerY - button.heightPx / 2) + "px";
+
     layers.mouseOverlay.appendChild(button);
-    return () => {
-        layers.mouseOverlay.removeChild(button);
-    };
+    return () => layers.mouseOverlay.removeChild(button);
 }
 
 function createPointerMoveControl(pointerMoveControl: LayerPointerMoveControl,
@@ -441,8 +454,7 @@ function createPointerMoveControl(pointerMoveControl: LayerPointerMoveControl,
                                   ci: CommandInterface,
                                   gridConfig: GridConfiguration,
                                   sensors: ControlSensors,
-    // eslint-disable-next-line
-    dosInstance: DosInstance) {
+                                  dosInstance: DosInstance) {
     const { cells, columnWidth } = gridConfig;
     const { row, column, x, y } = pointerMoveControl;
     const { centerX, centerY } = cells[row][column];
@@ -455,21 +467,24 @@ function createPointerMoveControl(pointerMoveControl: LayerPointerMoveControl,
             ci.sendMouseMotion(x, y);
         },
     };
-    const button = createButton(pointerMoveControl.symbol, handler, columnWidth);
-
-    button.style.position = "absolute";
-    button.style.left = (centerX - button.widthPx / 2) + "px";
-    button.style.top = (centerY - button.heightPx / 2) + "px";
 
     sensors.register(row, column, {
         activate: handler.onDown,
         deactivate: handler.onUp,
     });
 
+    if (isHidden(gridConfig, row, column)) {
+        return () => {};
+    }
+
+    const button = createButton(pointerMoveControl.symbol, handler, columnWidth);
+
+    button.style.position = "absolute";
+    button.style.left = (centerX - button.widthPx / 2) + "px";
+    button.style.top = (centerY - button.heightPx / 2) + "px";
+
     layers.mouseOverlay.appendChild(button);
-    return () => {
-        layers.mouseOverlay.removeChild(button);
-    };
+    return () => layers.mouseOverlay.removeChild(button);
 }
 
 function createPointerResetControl(pointerResetControl: LayerPointerResetControl,
@@ -477,8 +492,7 @@ function createPointerResetControl(pointerResetControl: LayerPointerResetControl
                                    ci: CommandInterface,
                                    gridConfig: GridConfiguration,
                                    sensors: ControlSensors,
-    // eslint-disable-next-line
-    dosInstance: DosInstance) {
+                                   dosInstance: DosInstance) {
     const { cells, columnWidth } = gridConfig;
     const { row, column } = pointerResetControl;
     const { centerX, centerY } = cells[row][column];
@@ -488,22 +502,24 @@ function createPointerResetControl(pointerResetControl: LayerPointerResetControl
             ci.sendMouseSync();
         },
     };
+
+    sensors.register(row, column, {
+        activate: handler.onDown,
+        deactivate: () => { },
+    });
+
+    if (isHidden(gridConfig, row, column)) {
+        return () => {};
+    }
+
     const button = createButton(pointerResetControl.symbol, handler, columnWidth);
 
     button.style.position = "absolute";
     button.style.left = (centerX - button.widthPx / 2) + "px";
     button.style.top = (centerY - button.heightPx / 2) + "px";
 
-    sensors.register(row, column, {
-        activate: handler.onDown,
-        // eslint-disable-next-line
-        deactivate: () => { },
-    });
-
     layers.mouseOverlay.appendChild(button);
-    return () => {
-        layers.mouseOverlay.removeChild(button);
-    };
+    return () => layers.mouseOverlay.removeChild(button);
 }
 
 function createPointerToggleControl(pointerToggleControl: LayerPointerToggleControl,
@@ -511,8 +527,7 @@ function createPointerToggleControl(pointerToggleControl: LayerPointerToggleCont
                                     ci: CommandInterface,
                                     gridConfig: GridConfiguration,
                                     sensors: ControlSensors,
-    // eslint-disable-next-line
-    dosInstance: DosInstance) {
+                                    dosInstance: DosInstance) {
     const { cells, columnWidth } = gridConfig;
     const { row, column } = pointerToggleControl;
     const { centerX, centerY } = cells[row][column];
@@ -529,32 +544,32 @@ function createPointerToggleControl(pointerToggleControl: LayerPointerToggleCont
             }
         },
     };
+
+    sensors.register(row, column, {
+        activate: handler.onDown,
+        deactivate: () => { },
+    });
+
+    if (isHidden(gridConfig, row, column)) {
+        return () => {};
+    }
+
     const button = createButton(pointerToggleControl.symbol, handler, columnWidth);
 
     button.style.position = "absolute";
     button.style.left = (centerX - button.widthPx / 2) + "px";
     button.style.top = (centerY - button.heightPx / 2) + "px";
 
-    sensors.register(row, column, {
-        activate: handler.onDown,
-        // eslint-disable-next-line
-        deactivate: () => { },
-    });
-
     layers.mouseOverlay.appendChild(button);
-    return () => {
-        layers.mouseOverlay.removeChild(button);
-    };
+    return () => layers.mouseOverlay.removeChild(button);
 }
 
 function createNippleActivatorControl(nippleActivatorControl: LayerNippleActivatorControl,
                                       layers: Layers,
                                       ci: CommandInterface,
                                       gridConfig: GridConfiguration,
-    // eslint-disable-next-line
-    sensors: ControlSensors,
-    // eslint-disable-next-line
-    dosInstance: DosInstance) {
+                                      sensors: ControlSensors,
+                                      dosInstance: DosInstance) {
     const { cells, columnWidth, rowHeight, width, height } = gridConfig;
     const { row, column } = nippleActivatorControl;
     const { centerX, centerY } = cells[row][column];
@@ -663,9 +678,7 @@ function createNippleActivatorControl(nippleActivatorControl: LayerNippleActivat
 
     function onEnd(e: Event) {
         if (started) {
-            started = false;
             manager.processOnEnd(e);
-            e.stopPropagation();
         }
     }
 
@@ -680,4 +693,31 @@ function createNippleActivatorControl(nippleActivatorControl: LayerNippleActivat
             layers.mouseOverlay.removeEventListener(next, onEnd, options);
         }
     };
+}
+
+function isHidden(config: GridConfiguration, row: number, column: number) {
+    return (config.cells[row][column] as CellWithMeta).hidden === true;
+}
+
+function setHiddenAround(config: GridConfiguration,
+                         centralRow: number,
+                         centralColumn: number) {
+    function setHiddenIfValid(row: number, column: number) {
+        if (row === centralRow && column === centralColumn) {
+            return;
+        }
+
+        if (row >= 0 && row < config.cells.length) {
+            const rowCells = config.cells[row];
+            if (column >= 0 && column < rowCells.length) {
+                (rowCells[column] as CellWithMeta).hidden = true;
+            }
+        }
+    }
+
+    for (let ri = centralRow - 1; ri <= centralRow + 1; ++ri) {
+        for (let ci = centralColumn - 1; ci <= centralColumn + 1; ++ci) {
+            setHiddenIfValid(ri, ci);
+        }
+    }
 }

@@ -4,7 +4,10 @@ import { Mapper } from "./keyboard";
 
 import { GridType } from "./grid";
 
-export type LayerControlType = "Options" | "Key" | "Keyboard" | "Switch" | "ScreenMove" | "PointerButton";
+export type LayerControlType =
+    "Options" | "Key" | "Keyboard" |
+    "Switch" | "ScreenMove" |
+    "PointerButton" | "NippleActivator";
 
 export interface LayerPosition {
     column: number;
