@@ -75,14 +75,14 @@ export type LegacyLayersConfig = {[index: string]: LegacyLayerConfig};
 
 export function extractLayersConfig(config: any): LayersConfig | LegacyLayersConfig | null {
     if (config.layersConfig !== undefined) {
+        if (config.layersConfig.version === 1) {
+            migrateV1ToV2(config.layersConfig);
+        }
+
         return config.layersConfig;
     }
 
     if (config.layers !== undefined) {
-        if (config.layers.version === 1) {
-            migrateV1ToV2(config);
-        }
-
         return config.layers;
     }
 
