@@ -5,6 +5,6 @@
 
 export const Build = {
     short: "0.72.8",
-    version: "0.72.8 (8dbef894934ba66115b42c47db147c61)",
-    buildSeed: 1641920074716,
+    version: "0.72.8 (c66a0cae039c95fbe9b493b296a2ca84)",
+    buildSeed: 1642744632714,
 };
