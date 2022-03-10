@@ -1,4 +1,4 @@
-import { CommandInterface } from "emulators";
+import { CommandInterface, DirectSound } from "emulators";
 
 class SamplesQueue {
     private samplesQueue: Float32Array[] = [];
@@ -81,7 +81,54 @@ export function audioNode(ci: CommandInterface) {
 
     const audioNode = audioContext.createScriptProcessor(bufferSize, 0, channels);
     let started = false;
-    audioNode.onaudioprocess = (event) => {
+
+    let active = 0;
+    const directSound = ci.directSound as DirectSound;
+    const onDirectProcess = (event: AudioProcessingEvent) => {
+        if (!started) {
+            const buffer = directSound.buffer[0];
+            started = Math.ceil(buffer[buffer.length - 1]) > 0;
+        }
+
+        if (!started) {
+            return;
+        }
+
+        let offset = 0;
+        let numFrames = event.outputBuffer.length;
+        const numChannels = event.outputBuffer.numberOfChannels;
+
+        let numSamples;
+        let buffer = directSound.buffer[active];
+        while (numFrames > 0 && (numSamples = Math.ceil(buffer[buffer.length - 1])) > 0) {
+            if (numFrames >= numSamples) {
+                const source = buffer.subarray(0, numSamples);
+                for (let channel = 0; channel < numChannels; ++channel) {
+                    const channelData = event.outputBuffer.getChannelData(channel);
+                    channelData.set(source, offset);
+                }
+
+                offset += numSamples;
+                numFrames -= numSamples;
+
+                buffer[buffer.length - 1] = 0;
+                active = (active + 1) % directSound.ringSize;
+                buffer = directSound.buffer[active];
+            } else {
+                const source = buffer.subarray(0, numFrames);
+                for (let channel = 0; channel < numChannels; ++channel) {
+                    const channelData = event.outputBuffer.getChannelData(channel);
+                    channelData.set(source, offset);
+                }
+
+                buffer[buffer.length - 1] = numSamples - numFrames;
+                buffer.set(buffer.subarray(numFrames, numFrames + buffer[buffer.length - 1]));
+                numFrames = 0;
+            }
+        }
+    };
+
+    const onQueueProcess = (event: AudioProcessingEvent) => {
         const numFrames = event.outputBuffer.length;
         const numChannels = event.outputBuffer.numberOfChannels;
         const samplesCount = samplesQueue.length();
@@ -100,6 +147,7 @@ export function audioNode(ci: CommandInterface) {
         }
     };
 
+    audioNode.onaudioprocess = ci.directSound !== undefined ? onDirectProcess : onQueueProcess;
     audioNode.connect(audioContext.destination);
 
     const resumeWebAudio = () => {

@@ -48,15 +48,25 @@ export function _2d(layers: Layers, ci: CommandInterface) {
         onResize();
     };
     ci.events().onFrameSize(onResizeFrame);
-    ci.events().onFrame((rgb) => {
-        let rgbOffset = 0;
+    ci.events().onFrame((frameRgb, frameRgba) => {
+        if (frameRgb === null && frameRgba === null) {
+            return;
+        }
+
+        const frame = (frameRgb !== null ? frameRgb : frameRgba) as Uint8Array;
+
+        let frameOffset = 0;
         let rgbaOffset = 0;
 
         while (rgbaOffset < rgba.length) {
-            rgba[rgbaOffset++] = rgb[rgbOffset++];
-            rgba[rgbaOffset++] = rgb[rgbOffset++];
-            rgba[rgbaOffset++] = rgb[rgbOffset++];
+            rgba[rgbaOffset++] = frame[frameOffset++];
+            rgba[rgbaOffset++] = frame[frameOffset++];
+            rgba[rgbaOffset++] = frame[frameOffset++];
             rgba[rgbaOffset++] = 255;
+
+            if (frame.length === rgba.length) {
+                frameOffset++;
+            }
         }
 
         context.putImageData(new ImageData(rgba, frameWidth, frameHeight), 0, 0);

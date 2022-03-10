@@ -93,14 +93,29 @@ export function webGl(layers: Layers, ci: CommandInterface) {
         onResize();
     };
     ci.events().onFrameSize(onResizeFrame);
-    ci.events().onFrame((rgb) => {
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB,
-            frameWidth, frameHeight, 0, gl.RGB, gl.UNSIGNED_BYTE,
-            rgb);
-        gl.drawArrays(gl.TRIANGLES, 0, 6);
+    onResizeFrame(ci.width(), ci.height());
+
+    let requestAnimationFrameId: number | null = null;
+    let frame: Uint8Array | null = null;
+    let frameFormat: number = 0;
+
+    ci.events().onFrame((rgb, rgba) => {
+        frame = rgb != null ? rgb : rgba;
+        frameFormat = rgb != null ? gl.RGB : gl.RGBA;
+        if (requestAnimationFrameId === null) {
+            requestAnimationFrameId = requestAnimationFrame(updateTexture);
+        }
     });
 
-    onResizeFrame(ci.width(), ci.height());
+    const updateTexture = () => {
+        gl.texImage2D(gl.TEXTURE_2D, 0, frameFormat,
+            frameWidth, frameHeight, 0, frameFormat, gl.UNSIGNED_BYTE,
+            frame);
+        gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+        requestAnimationFrameId = null;
+        frame = null;
+    };
 
     ci.events().onExit(() => {
         layers.removeOnResize(onResizeLayer);
