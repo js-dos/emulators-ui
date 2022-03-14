@@ -1,3 +1,5 @@
+
+import { Build } from "./build";
 import { layers } from "./dom/layers";
 import { lifecycle } from "./dom/lifecycle";
 import { resolveBundle } from "./network/xhr";
@@ -19,6 +21,8 @@ import { LStorage } from "./dom/storage";
 import { DosInstance, DosFactoryType, DosOptions } from "./js-dos";
 
 export class EmulatorsUi {
+    build = Build;
+
     dom = {
         layers, // DOM components that used by js-dos player
         lifecycle, // compnent that manges liefcycle events

@@ -2,7 +2,6 @@ import { Emulators, CommandInterface } from "emulators";
 import { TransportLayer } from "emulators/dist/types/protocol/protocol";
 import { EmulatorsUi } from "./emulators-ui";
 import { Layers, LayersOptions } from "./dom/layers";
-import { Build } from "./build";
 
 import { extractLayersConfig, LegacyLayersConfig, LayersConfig } from "./controls/layers-config";
 
@@ -25,8 +24,6 @@ export interface DosOptions {
 }
 
 export class DosInstance {
-    static initialRun = true;
-
     emulatorsUi: EmulatorsUi;
     emulatorFunction: EmulatorFunction;
     createTransportLayer?: () => TransportLayer;
@@ -50,11 +47,6 @@ export class DosInstance {
     private onMobileControlsChanged: (visible: boolean) => void;
 
     constructor(root: HTMLDivElement, emulatorsUi: EmulatorsUi, options: DosOptions) {
-        if (DosInstance.initialRun) {
-            emulators.cacheSeed += " ui (" + Build.short + ")";
-            DosInstance.initialRun = false;
-        }
-
         this.options = options;
         this.emulatorsUi = emulatorsUi;
         this.storage = emulatorsUi.dom.storage;
