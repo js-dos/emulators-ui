@@ -1,4 +1,4 @@
-[![Build](https://github.com/js-dos/emulators-ui/actions/workflows/npm-build.yml/badge.svg)](https://github.com/js-dos/emulators-ui/actions/workflows/npm-build.yml)
+[![Build](https://github.com/js-dos/emulators-ui/workflows/Build/badge.svg)](https://github.com/js-dos/emulators-ui/actions/workflows/npm-build.yml)
 
 # emulators-ui
 
