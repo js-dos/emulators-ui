@@ -1,4 +1,4 @@
-import { Emulators, CommandInterface } from "emulators";
+import { Emulators, CommandInterface, BackendOptions } from "emulators";
 import { TransportLayer } from "emulators/dist/types/protocol/protocol";
 import { EmulatorsUi } from "./emulators-ui";
 import { Layers, LayersOptions } from "./dom/layers";
@@ -254,6 +254,19 @@ export class DosInstance {
             const bundlePromise = emulatorsUi.network.resolveBundle(bundleUrl, {
                 onprogress: (percent) => this.layers.setLoadingMessage("Downloading bundle " + percent + "%"),
             });
+            const options: BackendOptions = {
+                onExtractProgress: (index, file, extracted, total) => {
+                    if (index !== 0) {
+                        return;
+                    }
+
+                    const percent = Math.round(extracted / total * 100);
+                    const lastIndex = file.lastIndexOf("/");
+
+                    const name = file.substring(lastIndex + 1);
+                    this.layers.setLoadingMessage("Extracting " + percent + "% (" + name + ")");
+                },
+            };
             try {
                 let changesBundle: Uint8Array | undefined;
                 if (optionalChangesUrl !== undefined && optionalChangesUrl !== null && optionalChangesUrl.length > 0) {
@@ -264,17 +277,17 @@ export class DosInstance {
                 const bundle = await bundlePromise;
                 if (this.emulatorFunction === "backend") {
                     this.ciPromise = emulators.backend([bundle, changesBundle],
-                        (this as any).createTransportLayer() as TransportLayer);
+                        (this as any).createTransportLayer() as TransportLayer, options);
                 } else {
-                    this.ciPromise = emulators[this.emulatorFunction]([bundle, changesBundle]);
+                    this.ciPromise = emulators[this.emulatorFunction]([bundle, changesBundle], options);
                 }
             } catch {
                 const bundle = await bundlePromise;
                 if (this.emulatorFunction === "backend") {
                     this.ciPromise = emulators.backend([bundle],
-                        (this as any).createTransportLayer() as TransportLayer);
+                        (this as any).createTransportLayer() as TransportLayer, options);
                 } else {
-                    this.ciPromise = emulators[this.emulatorFunction]([bundle]);
+                    this.ciPromise = emulators[this.emulatorFunction]([bundle], options);
                 }
             }
         }
