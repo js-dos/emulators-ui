@@ -41,10 +41,15 @@ export class DosInstance {
 
     storage: Storage;
 
+    volume: number;
+
     private clickToStart: boolean;
     private unbindControls: () => void = () => {/**/};
     private storedLayersConfig: LayersConfig | LegacyLayersConfig | null = null;
     private onMobileControlsChanged: (visible: boolean) => void;
+    private onSensitivityChanged: ((sensitivity: number) => void)[] = [];
+    private onScaleChanged: ((scale: number) => void)[] = [];
+    private onVolumeChanged: ((scale: number) => void)[] = [];
 
     constructor(root: HTMLDivElement, emulatorsUi: EmulatorsUi, options: DosOptions) {
         this.options = options;
@@ -65,6 +70,9 @@ export class DosInstance {
 
         const sensitivityValue = Number.parseFloat(this.storage.getItem("sensitivity") ?? "1.0");
         this.sensitivity = Number.isNaN(sensitivityValue) ? 1.0 : sensitivityValue;
+
+        const volumeValue = Number.parseFloat(this.storage.getItem("volume") ?? "1.0");
+        this.volume = Number.isNaN(volumeValue) ? 1.0 : volumeValue;
 
         this.onMobileControlsChanged = () => {/**/};
 
@@ -221,6 +229,9 @@ export class DosInstance {
         if (this.mobileControls) {
             await this.setLayersConfig(this.layersConfig);
         }
+        for (const next of this.onScaleChanged) {
+            next(this.scaleControls);
+        }
     }
 
     public async setSensitivity(sensitivity: number) {
@@ -230,6 +241,16 @@ export class DosInstance {
         this.sensitivity = sensitivity;
         this.storage.setItem("sensitivity", sensitivity + "");
         await this.setLayersConfig(this.layersConfig);
+        for (const next of this.onSensitivityChanged) {
+            next(this.sensitivity);
+        }
+    }
+
+    public async setVolume(volume: number) {
+        this.volume = volume;
+        for (const next of this.onVolumeChanged) {
+            next(this.volume);
+        }
     }
 
     public async setAutolock(autolock: boolean) {
@@ -243,6 +264,30 @@ export class DosInstance {
     public setOnMobileControlsChanged(handler: (visible: boolean) => void) {
         this.onMobileControlsChanged = handler;
     }
+
+    public registerOnSensitivityChanged = (handler: (sensitivity: number) => void) => {
+        this.onSensitivityChanged.push(handler);
+    };
+
+    public removeOnSensitivityChanged = (handler: (sensitivity: number) => void) => {
+        this.onSensitivityChanged = this.onSensitivityChanged.filter((n) => n !== handler);
+    };
+
+    public registerOnScaleChanged = (handler: (scale: number) => void) => {
+        this.onScaleChanged.push(handler);
+    };
+
+    public removeOnScaleChanged = (handler: (scale: number) => void) => {
+        this.onScaleChanged = this.onScaleChanged.filter((n) => n !== handler);
+    };
+
+    public registerOnVolumeChanged = (handler: (volume: number) => void) => {
+        this.onVolumeChanged.push(handler);
+    };
+
+    public removeOnVolumeChanged = (handler: (volume: number) => void) => {
+        this.onVolumeChanged = this.onVolumeChanged.filter((n) => n !== handler);
+    };
 
     private async runBundle(bundleUrl: string, optionalChangesUrl: string | undefined, persistKey: string) {
         const emulatorsUi = this.emulatorsUi;
