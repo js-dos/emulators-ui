@@ -41,13 +41,13 @@ class SamplesQueue {
     }
 }
 
-export function audioNode(ci: CommandInterface) {
+export function audioNode(ci: CommandInterface): (volume: number) => void {
     const sampleRate = ci.soundFrequency();
     const channels = 1;
 
     if (sampleRate === 0) {
         console.warn("Can't create audio node with sampleRate === 0, ingnoring");
-        return;
+        return () => {};
     }
 
     let audioContext: AudioContext | null = null;
@@ -66,7 +66,7 @@ export function audioNode(ci: CommandInterface) {
     }
 
     if (audioContext == null) {
-        return;
+        return () => {};
     }
 
     const samplesQueue = new SamplesQueue();
@@ -148,7 +148,12 @@ export function audioNode(ci: CommandInterface) {
     };
 
     audioNode.onaudioprocess = ci.directSound !== undefined ? onDirectProcess : onQueueProcess;
-    audioNode.connect(audioContext.destination);
+
+    const gainNode = audioContext.createGain();
+    gainNode.connect(audioContext.destination);
+    audioNode.connect(gainNode);
+
+    gainNode.gain.value = 1.0;
 
     const resumeWebAudio = () => {
         if (audioContext !== null && audioContext.state === "suspended") {
@@ -163,6 +168,7 @@ export function audioNode(ci: CommandInterface) {
     ci.events().onExit(() => {
         if (audioContext !== null) {
             audioNode.disconnect();
+            gainNode.disconnect();
             audioContext.close();
         }
 
@@ -170,4 +176,8 @@ export function audioNode(ci: CommandInterface) {
         document.removeEventListener("touchstart", resumeWebAudio);
         document.removeEventListener("keydown", resumeWebAudio);
     });
+
+    return (volume: number) => {
+        gainNode.gain.value = volume;
+    };
 }

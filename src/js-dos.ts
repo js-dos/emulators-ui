@@ -51,6 +51,8 @@ export class DosInstance {
     private onScaleChanged: ((scale: number) => void)[] = [];
     private onVolumeChanged: ((scale: number) => void)[] = [];
 
+    setVolumeImplFn: (volume: number) => void = () => {};
+
     constructor(root: HTMLDivElement, emulatorsUi: EmulatorsUi, options: DosOptions) {
         this.options = options;
         this.emulatorsUi = emulatorsUi;
@@ -117,7 +119,8 @@ export class DosInstance {
                 console.error("Unable to create webgl canvas, fallback to 2d rendering");
                 emulatorsUi.graphics._2d(this.layers, ci);
             }
-            emulatorsUi.sound.audioNode(ci);
+            this.setVolumeImplFn = emulatorsUi.sound.audioNode(ci);
+            this.setVolumeImplFn(this.volume);
         }
 
         emulatorsUi.dom.lifecycle(ci);
@@ -248,6 +251,8 @@ export class DosInstance {
 
     public async setVolume(volume: number) {
         this.volume = volume;
+        this.storage.setItem("volume", volume + "");
+        this.setVolumeImplFn(volume);
         for (const next of this.onVolumeChanged) {
             next(this.volume);
         }
