@@ -6,7 +6,7 @@ import { createDiv, stopPropagation } from "./helpers";
 import { domToKeyCode, KBD_enter, KBD_leftshift,
     KBD_backspace, KBD_capslock, KBD_tab, KBD_space, KBD_esc,
     KBD_leftctrl, KBD_leftalt, KBD_comma, KBD_period, KBD_quote,
-    KBD_semicolon, KBD_leftbracket, KBD_rightbracket,
+    KBD_semicolon, KBD_leftbracket, KBD_rightbracket, KBD_up, KBD_down, KBD_left, KBD_right,
 } from "./keys";
 /* eslint-enable camelcase */
 
@@ -304,23 +304,39 @@ export class Layers {
 
         const layout = {
             en: [
-                "{esc} ` 1 2 3 4 5 6 7 8 9 0 - = {bksp}",
-                "q w e r t y u i o p { } \\",
-                "a s d f g h j k l ; ' [ {enter}",
-                "⎘ z x c v b n m , . / ] {space}",
+                "{esc} ` 1 2 3 4 5 6 7 8 9 0 () - = {bksp} {enter}",
+                "{tab} q w e r t y u i o p { } \\ {up}",
+                "{shift} {left} {right} a s d f g h j k l ; ' [ {down}",
+                "⎘ {alt} {ctrl} z x c v b n m , . / ] {space}",
             ],
         };
         const enLayoutDisplay = {
-            "{esc}": "ESC",
-            "{bksp}": "Backspace",
-            "{enter}": "⏎",
+            "{esc}": "␛",
+            "{bksp}": "⌫",
+            "{enter}": "↵",
             "{space}": "Space",
+            "{up}": "↑",
+            "{down}": "↓",
+            "{left}": "←",
+            "{right}": "→",
+            "{shift}": "⇑",
+            "{ctrl}": "Ctrl",
+            "{alt}": "Alt",
+            "{tab}": "Tab",
         };
         const ruLayoutDisplay = {
-            "{esc}": "ESC",
-            "{bksp}": "Backspace",
-            "{enter}": "⏎",
+            "{esc}": "␛",
+            "{bksp}": "⌫",
+            "{enter}": "↵",
             "{space}": "Space",
+            "{up}": "↑",
+            "{down}": "↓",
+            "{left}": "←",
+            "{right}": "→",
+            "{shift}": "⇑",
+            "{alt}": "Alt",
+            "{ctrl}": "Ctrl",
+            "{tab}": "Tab",
             "q": "й", "w": "ц", "e": "у", "r": "к", "t": "е",
             "y": "н", "u": "г", "i": "ш", "o": "щ", "p": "з",
             "{": "х", "}": "ъ", "a": "ф", "s": "ы", "d": "в",
@@ -337,12 +353,21 @@ export class Layers {
         keyboardDiv.style.display = "none";
         stopPropagation(keyboardDiv);
 
-
         const keyboard = new Keyboard(keyboardDiv, {
             layout,
             layoutName: "en",
             display: displayOrder[displayIndex],
-            onKeyPress: (button) => {
+            onKeyPress: (button: string) => {
+                if (button === "⎘") {
+                    return;
+                }
+
+                const keyCodes = buttonToCode(button);
+                for (const keyCode of keyCodes) {
+                    this.fireKeyDown(keyCode);
+                }
+            },
+            onKeyReleased: (button: string) => {
                 if (button === "⎘") {
                     displayIndex = (displayIndex + 1) % displayOrder.length;
                     keyboard.setOptions({
@@ -352,18 +377,14 @@ export class Layers {
                 }
 
                 const keyCodes = buttonToCode(button);
-                if (keyCodes.length === 1) {
-                    this.fireKeyPress(keyCodes[0]);
-                } else if (keyCodes.length > 0) {
-                    this.fireKeysPress(keyCodes);
+                for (const keyCode of keyCodes) {
+                    this.fireKeyUp(keyCode);
                 }
             },
             preventMouseDownDefault: true,
             preventMouseUpDefault: true,
             stopMouseDownPropagation: true,
             stopMouseUpPropagation: true,
-            autoUseTouchEvents: true,
-            useMouseEvents: true,
         });
 
         this.toggleKeyboard = () => {
@@ -432,10 +453,18 @@ function buttonToCode(button: string): number[] {
             return [KBD_space];
         } else if (button === "{esc}") {
             return [KBD_esc];
-        } else if (button === "ctrl") {
+        } else if (button === "{ctrl}") {
             return [KBD_leftctrl];
         } else if (button === "{alt}") {
             return [KBD_leftalt];
+        } else if (button === "{up}") {
+            return [KBD_up];
+        } else if (button === "{down}") {
+            return [KBD_down];
+        } else if (button === "{left}") {
+            return [KBD_left];
+        } else if (button === "{right}") {
+            return [KBD_right];
         } else {
             console.warn("Unknown button", button);
             return [];
