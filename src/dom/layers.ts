@@ -19,6 +19,7 @@ const resizeDetector = elementResizeDetector({
 export interface LayersOptions {
     optionControls?: string[];
     keyboardDiv?: HTMLDivElement;
+    keyboardInputDiv?: HTMLDivElement;
     fullscreenElement?: HTMLElement;
 }
 
@@ -134,14 +135,22 @@ export class Layers {
     }
 
     private initKeyEvents() {
-        window.addEventListener("keydown", (e) => {
+        const keyboardInput = this.options.keyboardInputDiv ?? this.root;
+        keyboardInput.style.outline = "none";
+        if (!keyboardInput.tabIndex || keyboardInput.tabIndex === -1) {
+            keyboardInput.tabIndex = 0;
+        }
+        keyboardInput.addEventListener("keydown", (e) => {
             const keyCode = domToKeyCode(e.keyCode);
             this.onKeyDown(keyCode);
+            e.stopPropagation();
+            e.preventDefault();
         });
-
-        window.addEventListener("keyup", (e) => {
+        keyboardInput.addEventListener("keyup", (e) => {
             const keyCode = domToKeyCode(e.keyCode);
             this.onKeyUp(keyCode);
+            e.stopPropagation();
+            e.preventDefault();
         });
     }
 
@@ -385,6 +394,10 @@ export class Layers {
             preventMouseUpDefault: true,
             stopMouseDownPropagation: true,
             stopMouseUpPropagation: true,
+            physicalKeyboardHighlight: false,
+            physicalKeyboardHighlightPress: false,
+            physicalKeyboardHighlightPressUseClick: false,
+            physicalKeyboardHighlightPressUsePointerEvents: false,
         });
 
         this.toggleKeyboard = () => {
