@@ -4,7 +4,7 @@
 // gulpfile.ts/wasm.ts --> generateBuildInfo
 
 export const Build = {
-    short: "0.73.6",
-    version: "0.73.6 (56358274d9c94c50e01e40c6e3b92c6e)",
-    buildSeed: 1658134329704,
+    short: "0.73.8",
+    version: "0.73.8 (3f45c09550da147bae83e339cc00d649)",
+    buildSeed: 1673509074063,
 };

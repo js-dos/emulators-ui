@@ -24,7 +24,7 @@ void main(void) {
 }
 `;
 
-export function webGl(layers: Layers, ci: CommandInterface) {
+export function webGl(layers: Layers, ci: CommandInterface, forceAspect?: number) {
     const canvas = layers.canvas;
     const gl = canvas.getContext("webgl");
     if (gl === null) {
@@ -60,7 +60,7 @@ export function webGl(layers: Layers, ci: CommandInterface) {
     let frameHeight = 0;
 
     const onResize = () => {
-        const aspect = frameWidth / frameHeight;
+        const aspect = forceAspect ?? (frameWidth / frameHeight);
 
         let width = containerWidth;
         let height = containerWidth / aspect;

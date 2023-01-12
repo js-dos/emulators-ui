@@ -1,7 +1,7 @@
 import { Layers } from "../dom/layers";
 import { CommandInterface } from "emulators";
 
-export function _2d(layers: Layers, ci: CommandInterface) {
+export function _2d(layers: Layers, ci: CommandInterface, forceAspect?: number) {
     const canvas = layers.canvas;
     const context = canvas.getContext("2d");
     if (context === null) {
@@ -14,7 +14,7 @@ export function _2d(layers: Layers, ci: CommandInterface) {
     let frameHeight = 0;
 
     const onResize = () => {
-        const aspect = frameWidth / frameHeight;
+        const aspect = forceAspect ?? frameWidth / frameHeight;
 
         let width = containerWidth;
         let height = containerWidth / aspect;

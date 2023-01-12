@@ -16,6 +16,7 @@ declare const emulators: Emulators;
 export type EmulatorFunction = "dosboxWorker" | "dosboxDirect" | "dosboxNode" | "janus" | "backend";
 
 export interface DosOptions {
+    aspect?: number;
     noWebGL?: boolean;
     emulatorFunction?: EmulatorFunction;
     clickToStart?: boolean;
@@ -113,11 +114,11 @@ export class DosInstance {
                 if (this.options.noWebGL === true) {
                     throw new Error("WebGL is disabled by options");
                 }
-                emulatorsUi.graphics.webGl(this.layers, ci);
+                emulatorsUi.graphics.webGl(this.layers, ci, this.options.aspect);
             } catch (e) {
                 // eslint-disable-next-line
                 console.error("Unable to create webgl canvas, fallback to 2d rendering");
-                emulatorsUi.graphics._2d(this.layers, ci);
+                emulatorsUi.graphics._2d(this.layers, ci, this.options.aspect);
             }
             this.setVolumeImplFn = emulatorsUi.sound.audioNode(ci);
             this.setVolumeImplFn(this.volume);
