@@ -16,6 +16,9 @@ declare const emulators: Emulators;
 export type EmulatorFunction = "dosboxWorker" | "dosboxDirect" | "dosboxNode" | "janus" | "backend";
 
 export interface DosOptions {
+    sensitivityValue?: number;
+    mirroredControls?: boolean;
+    scaleControls?: number;
     aspect?: number;
     noWebGL?: boolean;
     emulatorFunction?: EmulatorFunction;
@@ -66,12 +69,18 @@ export class DosInstance {
         this.mobileControls = pointers.bind.mobile;
         this.autolock = false;
 
-        this.mirroredControls = this.storage.getItem("mirroredControls") === "true";
+        this.mirroredControls =
+            this.options.mirroredControls === true ||
+            this.storage.getItem("mirroredControls") === "true";
 
-        const scaleControlsValue = Number.parseFloat(this.storage.getItem("scaleControls") ?? "1.0");
+        const scaleControlsValue =
+        this.options.scaleControls ??
+            Number.parseFloat(this.storage.getItem("scaleControls") ?? "1.0");
         this.scaleControls = Number.isNaN(scaleControlsValue) ? 1.0 : scaleControlsValue;
 
-        const sensitivityValue = Number.parseFloat(this.storage.getItem("sensitivity") ?? "1.0");
+        const sensitivityValue =
+            this.options.sensitivityValue ??
+            Number.parseFloat(this.storage.getItem("sensitivity") ?? "1.0");
         this.sensitivity = Number.isNaN(sensitivityValue) ? 1.0 : sensitivityValue;
 
         const volumeValue = Number.parseFloat(this.storage.getItem("volume") ?? "1.0");
